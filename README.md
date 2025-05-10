@@ -255,7 +255,7 @@ Sistem ini dirancang untuk mendukung kebutuhan 25.000+ karyawan dari sebuah peru
 
 ## System Architecture
 
-![System Architecture](employee_attendance_architecture.png)
+![System Architecture](./design/employee_attendance_architecture.png)
 
 **Komponen:**
 
