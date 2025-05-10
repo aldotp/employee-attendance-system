@@ -255,8 +255,6 @@ Sistem ini dirancang untuk mendukung kebutuhan 25.000+ karyawan dari sebuah peru
 
 ## System Architecture
 
-![System Architecture](./design/employee_attendance_architecture.png)
-
 **Komponen:**
 
 Komponen Teknologi
@@ -271,15 +269,6 @@ Komponen Teknologi
 - **Monitoring Prometheus:** + Grafana
 - **CI/CD:** GitHub Actions / GitLab CI
 - **Containerization:** Docker + Kubernetes (EKS / GKE / Self-hosted)
-
-- **Mobile/Web Client:** untuk absensi dan manajemen pengguna.
-- **API Gateway:** mengatur traffic, autentikasi, rate-limiting.
-- **Attendance Service:** logic utama absensi, validasi lokasi/selfie.
-- **User Service:** autentikasi & manajemen data karyawan.
-- **Notification Service:** kirim reminder, notifikasi cuti/izin.
-- **Storage Service (e.g. S3):** simpan foto selfie dan log lokasi.
-- **Database (PostgreSQL/MySQL):** penyimpanan data absensi dan user.
-- **Monitoring (Grafana, Prometheus):** memantau kesehatan sistem.
 
 ---
 
