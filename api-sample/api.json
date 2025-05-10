@@ -1,0 +1,481 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Employee Attendance System API",
+    "version": "1.0.0",
+    "description": "API untuk sistem absensi karyawan"
+  },
+  "paths": {
+    "/auth": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Login user",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  }
+                },
+                "required": ["email", "password"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login berhasil",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "token": {
+                      "type": "string"
+                    },
+                    "user": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Kredensial tidak valid"
+          }
+        }
+      }
+    },
+    "/attendance": {
+      "post": {
+        "tags": ["Attendance"],
+        "summary": "Melakukan absensi (check-in/check-out)",
+        "security": [{"bearerAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": ["check-in", "check-out"]
+                  },
+                  "selfie": {
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "location": {
+                    "type": "object",
+                    "properties": {
+                      "latitude": {
+                        "type": "number"
+                      },
+                      "longitude": {
+                        "type": "number"
+                      }
+                    },
+                    "required": ["latitude", "longitude"]
+                  },
+                  "device_info": {
+                    "type": "object"
+                  }
+                },
+                "required": ["type", "selfie", "location"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Absensi berhasil"
+          },
+          "400": {
+            "description": "Invalid request - Data tidak lengkap atau tidak valid"
+          },
+          "401": {
+            "description": "Unauthorized - Token tidak valid"
+          }
+        }
+      }
+    },
+    "/leave-requests": {
+      "post": {
+        "tags": ["Leave Management"],
+        "summary": "Mengajukan cuti",
+        "security": [{"bearerAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "start_date": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "end_date": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": ["annual", "sick", "unpaid", "maternity", "paternity"]
+                  },
+                  "reason": {
+                    "type": "string"
+                  }
+                },
+                "required": ["start_date", "end_date", "type", "reason"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Pengajuan cuti berhasil dibuat"
+          },
+          "400": {
+            "description": "Invalid request - Data tidak valid"
+          }
+        }
+      }
+    },
+    "/schedules": {
+      "post": {
+        "tags": ["Schedule Management"],
+        "summary": "Membuat jadwal kerja",
+        "security": [{"bearerAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "employee_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "date": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "shift_start": {
+                    "type": "string",
+                    "format": "time"
+                  },
+                  "shift_end": {
+                    "type": "string",
+                    "format": "time"
+                  },
+                  "work_location_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                },
+                "required": ["employee_id", "date", "shift_start", "shift_end"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Jadwal berhasil dibuat"
+          }
+        }
+      },
+      "get": {
+        "tags": ["Schedule Management"],
+        "summary": "Mendapatkan jadwal kerja",
+        "security": [{"bearerAuth": []}],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "employee_id",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "month",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Daftar jadwal berhasil diambil"
+          }
+        }
+      }
+    },
+    "/users": {
+      "post": {
+        "tags": ["User Management"],
+        "summary": "Membuat user baru",
+        "security": [{"bearerAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "password": {
+                    "type": "string",
+                    "minLength": 8
+                  },
+                  "full_name": {
+                    "type": "string"
+                  },
+                  "role": {
+                    "type": "string",
+                    "enum": ["admin", "hr", "manager", "employee"]
+                  },
+                  "location": {
+                    "type": "string"
+                  },
+                  "timezone": {
+                    "type": "string"
+                  }
+                },
+                "required": ["email", "password", "full_name", "role"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User berhasil dibuat"
+          },
+          "400": {
+            "description": "Data tidak valid"
+          }
+        }
+      },
+      "get": {
+        "tags": ["User Management"],
+        "summary": "Mendapatkan daftar user",
+        "security": [{"bearerAuth": []}],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "role",
+            "schema": {
+              "type": "string",
+              "enum": ["admin", "hr", "manager", "employee"]
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string",
+              "enum": ["active", "inactive", "terminated", "suspended"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Daftar user berhasil diambil"
+          }
+        }
+      }
+    },
+    "/departments": {
+      "post": {
+        "tags": ["Department Management"],
+        "summary": "Membuat departemen baru",
+        "security": [{"bearerAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "head_employee_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "location": {
+                    "type": "string"
+                  },
+                  "timezone": {
+                    "type": "string"
+                  },
+                  "wfa_policy": {
+                    "type": "object"
+                  }
+                },
+                "required": ["name"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Departemen berhasil dibuat"
+          }
+        }
+      }
+    },
+    "/work-locations": {
+      "post": {
+        "tags": ["Location Management"],
+        "summary": "Menambah lokasi kerja baru",
+        "security": [{"bearerAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "address": {
+                    "type": "string"
+                  },
+                  "country_code": {
+                    "type": "string"
+                  },
+                  "latitude": {
+                    "type": "number",
+                    "format": "float"
+                  },
+                  "longitude": {
+                    "type": "number",
+                    "format": "float"
+                  },
+                  "radius": {
+                    "type": "integer"
+                  }
+                },
+                "required": ["name", "latitude", "longitude", "radius"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Lokasi kerja berhasil ditambahkan"
+          }
+        }
+      }
+    },
+    "/absence-anomalies": {
+      "get": {
+        "tags": ["Anomaly Management"],
+        "summary": "Mendapatkan daftar anomali absensi",
+        "security": [{"bearerAuth": []}],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "start_date",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "in": "query",
+            "name": "end_date",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "in": "query",
+            "name": "type",
+            "schema": {
+              "type": "string",
+              "enum": ["late", "not_present", "left_early", "forgot_checkin"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Daftar anomali berhasil diambil"
+          }
+        }
+      }
+    },
+    "/holidays": {
+      "post": {
+        "tags": ["Holiday Management"],
+        "summary": "Menambah hari libur",
+        "security": [{"bearerAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "date": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "country_code": {
+                    "type": "string"
+                  },
+                  "is_national": {
+                    "type": "boolean"
+                  }
+                },
+                "required": ["date", "name"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Hari libur berhasil ditambahkan"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}
