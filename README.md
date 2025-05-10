@@ -6,8 +6,8 @@ Sistem ini dirancang untuk mendukung kebutuhan 25.000+ karyawan dari sebuah peru
 
 - Perusahaan memiliki +- 25.000 karyawan tersebar di seluruh Indonesia dan beberapa bekerja di luar negeri (WFA).
 - Karyawan melakukan absensi melalui aplikasi mobile (Android/iOS) atau web.
-- Absensi menggunakan geolocation dan selfie verification (facial detection) untuk menghindari kecurangan.
-- Sistem memiliki timezone awareness (jam lokal karyawan sesuai lokasi).
+- Absensi menggunakan geolokasi dan verifikasi selfie (deteksi wajah) untuk menghindari kecurangan.
+- Sistem memiliki kesadaran zona waktu (jam lokal karyawan sesuai lokasi).
 - Tersedia fitur cuti, izin, dan absensi manual jika terjadi kesalahan teknis.
 - Setiap karyawan hanya bisa absen jika berada di lokasi yang diizinkan (bisa didefinisikan oleh admin).
 
@@ -25,7 +25,7 @@ Sistem ini dirancang untuk mendukung kebutuhan 25.000+ karyawan dari sebuah peru
   - Menyusun shift dan jadwal kerja
   - Mengekspor laporan absensi
 - Sistem dapat:
-  - Mendeteksi spoofing (absensi palsu) via GPS/Face Check
+  - Mendeteksi pemalsuan (absensi palsu) via GPS/Pengecekan Wajah
   - Menyesuaikan waktu berdasarkan zona waktu pengguna
   - Mengirim notifikasi saat lupa absen keluar
 
@@ -33,15 +33,15 @@ Sistem ini dirancang untuk mendukung kebutuhan 25.000+ karyawan dari sebuah peru
 
 ## Non-Functional Requirements
 
-| Requirement          | Detail                                                   |
-| -------------------- | -------------------------------------------------------- |
-| Availability         | 99.9% uptime, highly available via cloud infrastructure  |
-| Scalability          | Mampu menangani 25.000+ karyawan aktif secara paralel    |
-| Security             | JWT Auth, SSL/TLS, encrypted face images, anti-spoofing  |
-| Performance          | Respons time < 300ms untuk permintaan absensi            |
-| Compatibility        | Mobile App (Android/iOS), Web browser                    |
-| Logging & Monitoring | Tersedia log aktivitas, error tracking, dan sistem audit |
-| Backup               | Backup harian database absensi dan metadata selfie       |
+| Kebutuhan               | Detail                                                         |
+| ----------------------- | -------------------------------------------------------------- |
+| Ketersediaan            | 99.9% waktu aktif, ketersediaan tinggi via infrastruktur cloud |
+| Skalabilitas            | Mampu menangani 25.000+ karyawan aktif secara paralel          |
+| Keamanan                | Otentikasi JWT, SSL/TLS, enkripsi foto wajah, anti-pemalsuan   |
+| Performa                | Waktu respons < 300ms untuk permintaan absensi                 |
+| Kompatibilitas          | Aplikasi Mobile (Android/iOS), Browser Web                     |
+| Pencatatan & Pemantauan | Tersedia log aktivitas, pelacakan kesalahan, dan sistem audit  |
+| Cadangan                | Cadangan harian database absensi dan metadata selfie           |
 
 ---
 
@@ -202,56 +202,56 @@ Sistem ini dirancang untuk mendukung kebutuhan 25.000+ karyawan dari sebuah peru
 
 ## Use Cases
 
-1. **User Registration**
-   - User can register with their email and password.
-   - User can register as an employee or admin.
-   - User can register with a profile photo.
-2. **User Login**
-   - User can login with their email and password.
-   - User can login with their social media account.
-3. **User Profile**
-   - User can view their profile.
-   - User can update their profile.
-   - User can upload a profile photo.
-4. **Attendance**
-   - User can view their attendance history.
-   - User can view their attendance summary.
-   - User can view their attendance map.
-   - User can view their attendance report.
-5. **Leave Management**
-   - User can view their leave history.
-   - User can apply for leave.
-   - User can view their leave balance.
-   - User can view their leave status.
-6. **Schedule Management**
-   - User can view their schedule.
-   - User can view their schedule details.
-   - User can update their schedule.
-7. **Anomaly Detection**
-   - User can view their anomaly history.
-   - User can view their anomaly details.
-   - User can view their anomaly report.
-8. **Notification**
-   - User can view their notification history.
-   - User can view their notification details.
-   - User can mark their notification as read.
-9. **Report Generation**
-   - User can generate attendance report.
-   - User can generate leave report.
-   - User can generate attendance summary report.
-10. **Admin Dashboard**
-    - Admin can view attendance summary.
-    - Admin can view attendance history.
-    - Admin can view attendance map.
-    - Admin can view attendance report.
-    - Admin can view leave history.
-    - Admin can view leave report.
-    - Admin can view anomaly history.
-    - Admin can view anomaly report.
-    - Admin can view user profile.
-    - Admin can view user attendance history.
-    - Admin can view user leave history.
-    - Admin can view user anomaly history.
+1. **Pendaftaran Pengguna**
+   - Pengguna dapat mendaftar dengan email dan kata sandi.
+   - Pengguna dapat mendaftar sebagai karyawan atau admin.
+   - Pengguna dapat mendaftar dengan foto profil.
+2. **Masuk Pengguna**
+   - Pengguna dapat masuk dengan email dan kata sandi.
+   - Pengguna dapat masuk dengan akun media sosial.
+3. **Profil Pengguna**
+   - Pengguna dapat melihat profil mereka.
+   - Pengguna dapat memperbarui profil mereka.
+   - Pengguna dapat mengunggah foto profil.
+4. **Absensi**
+   - Pengguna dapat melihat riwayat absensi mereka.
+   - Pengguna dapat melihat ringkasan absensi mereka.
+   - Pengguna dapat melihat peta absensi mereka.
+   - Pengguna dapat melihat laporan absensi mereka.
+5. **Manajemen Cuti**
+   - Pengguna dapat melihat riwayat cuti mereka.
+   - Pengguna dapat mengajukan cuti.
+   - Pengguna dapat melihat saldo cuti mereka.
+   - Pengguna dapat melihat status cuti mereka.
+6. **Manajemen Jadwal**
+   - Pengguna dapat melihat jadwal mereka.
+   - Pengguna dapat melihat detail jadwal mereka.
+   - Pengguna dapat memperbarui jadwal mereka.
+7. **Deteksi Anomali**
+   - Pengguna dapat melihat riwayat anomali mereka.
+   - Pengguna dapat melihat detail anomali mereka.
+   - Pengguna dapat melihat laporan anomali mereka.
+8. **Notifikasi**
+   - Pengguna dapat melihat riwayat notifikasi mereka.
+   - Pengguna dapat melihat detail notifikasi mereka.
+   - Pengguna dapat menandai notifikasi sebagai telah dibaca.
+9. **Pembuatan Laporan**
+   - Pengguna dapat membuat laporan absensi.
+   - Pengguna dapat membuat laporan cuti.
+   - Pengguna dapat membuat laporan ringkasan absensi.
+10. **Dasbor Admin**
+    - Admin dapat melihat ringkasan absensi.
+    - Admin dapat melihat riwayat absensi.
+    - Admin dapat melihat peta absensi.
+    - Admin dapat melihat laporan absensi.
+    - Admin dapat melihat riwayat cuti.
+    - Admin dapat melihat laporan cuti.
+    - Admin dapat melihat riwayat anomali.
+    - Admin dapat melihat laporan anomali.
+    - Admin dapat melihat profil pengguna.
+    - Admin dapat melihat riwayat absensi pengguna.
+    - Admin dapat melihat riwayat cuti pengguna.
+    - Admin dapat melihat riwayat anomali pengguna.
 
 ## System Architecture
 
@@ -274,43 +274,43 @@ Komponen Teknologi
 
 ## High Level Flow
 
-1. Authentication Flow
+1. Alur Otentikasi
 
-   - User melakukan login melalui mobile app/web
+   - Pengguna melakukan login melalui aplikasi mobile/web
    - Sistem memvalidasi kredensial
-   - User mendapatkan akses sesuai role
-   - Sistem menyimpan session info
+   - Pengguna mendapatkan akses sesuai peran
+   - Sistem menyimpan informasi sesi
 
-2. Attendance Flow
+2. Alur Absensi
 
    - Karyawan membuka fitur absensi
    - Sistem memvalidasi jadwal kerja
    - Sistem mengecek lokasi via GPS
    - Sistem memvalidasi radius lokasi kerja
    - Karyawan melakukan selfie
-   - Sistem melakukan face recognition
+   - Sistem melakukan pengenalan wajah
    - Sistem mencatat waktu & lokasi
    - Sistem mengirim notifikasi sukses/gagal
 
-3. Leave Management Flow
+3. Alur Manajemen Cuti
 
    - Karyawan mengajukan cuti/izin
    - Sistem memvalidasi sisa cuti
-   - Sistem mengirim notifikasi ke approver
-   - Approver mereview pengajuan
+   - Sistem mengirim notifikasi ke pemberi persetujuan
+   - Pemberi persetujuan mereview pengajuan
    - Sistem memperbarui status cuti
-   - Sistem mengupdate attendance record
+   - Sistem mengupdate catatan absensi
    - Sistem mengirim notifikasi hasil
 
-4. Schedule Management Flow
+4. Alur Manajemen Jadwal
 
    - Admin membuat jadwal kerja
    - Sistem memvalidasi konflik jadwal
    - Sistem mengirim notifikasi ke karyawan
    - Karyawan menerima jadwal baru
-   - Sistem mengupdate database
+   - Sistem mengupdate basis data
 
-5. Anomaly Detection Flow
+5. Alur Deteksi Anomali
 
    - Sistem mendeteksi anomali absensi
    - Sistem mencatat jenis anomali
@@ -318,18 +318,17 @@ Komponen Teknologi
    - Admin/HR melakukan verifikasi
    - Sistem mengupdate status anomali
 
-6. Notification Flow
+6. Alur Notifikasi
 
-   - Sistem mengecek trigger events
-   - Sistem mempersiapkan template notifikasi
-   - Sistem menentukan recipient
+   - Sistem mengecek pemicu kejadian
+   - Sistem mempersiapkan templat notifikasi
+   - Sistem menentukan penerima
    - Sistem mengirim notifikasi
    - Sistem mencatat status pengiriman
 
-7. Report Generation Flow
-
+7. Alur Pembuatan Laporan
    - Admin memilih jenis laporan
    - Sistem mengumpulkan data
    - Sistem memproses data
    - Sistem menghasilkan laporan
-   - Sistem menyimpan history laporan
+   - Sistem menyimpan riwayat laporan
