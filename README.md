@@ -1,51 +1,64 @@
-# Employee Attendance System Design
+# 📱 Sistem Absensi Karyawan
+
+## 📋 Daftar Isi
+
+- [Tentang Sistem](#tentang-sistem)
+- [Asumsi](#asumsi)
+- [Kebutuhan Sistem](#kebutuhan-sistem)
+- [Entitas Database](#entitas-database)
+- [Fitur Sistem](#fitur-sistem)
+- [Arsitektur Sistem](#arsitektur-sistem)
+- [Alur Proses](#alur-proses)
+
+## 🎯 Tentang Sistem
 
 Sistem ini dirancang untuk mendukung kebutuhan 25.000+ karyawan dari sebuah perusahaan ritel yang menerapkan kebijakan Work From Anywhere (WFA). Karyawan tersebar di seluruh wilayah Indonesia dan sebagian di luar negeri. Tujuan dari sistem ini adalah mencatat dan memantau kehadiran karyawan dengan dukungan lokasi, waktu, dan validasi yang kuat.
 
-## Assumptions
+## 📌 Asumsi
 
-- Perusahaan memiliki +- 25.000 karyawan tersebar di seluruh Indonesia dan beberapa bekerja di luar negeri (WFA).
-- Karyawan melakukan absensi melalui aplikasi mobile (Android/iOS) atau web.
-- Absensi menggunakan geolokasi dan verifikasi selfie (deteksi wajah) untuk menghindari kecurangan.
-- Sistem memiliki kesadaran zona waktu (jam lokal karyawan sesuai lokasi).
-- Tersedia fitur cuti, izin, dan absensi manual jika terjadi kesalahan teknis.
-- Setiap karyawan hanya bisa absen jika berada di lokasi yang diizinkan (bisa didefinisikan oleh admin).
+- ✅ 25.000+ karyawan tersebar di Indonesia dan luar negeri
+- 📱 Absensi via aplikasi mobile atau web
+- 🌍 Validasi GPS dan pengenalan wajah
+- 🕒 Dukungan multi zona waktu
+- 📝 Fitur cuti dan izin terintegrasi
+- 📍 Validasi lokasi kerja
 
----
+## 💻 Kebutuhan Sistem
 
-## Functional Requirements
+### Kebutuhan Fungsional
 
-- Karyawan dapat:
-  - Melakukan absensi masuk & keluar
-  - Melihat histori absensi
-  - Mengajukan cuti/izin
-- Admin dapat:
-  - Melihat dashboard laporan absensi
-  - Melihat anomali (tidak absen, telat, lokasi tidak valid, dsb)
-  - Menyusun shift dan jadwal kerja
-  - Mengekspor laporan absensi
-- Sistem dapat:
-  - Mendeteksi pemalsuan (absensi palsu) via GPS/Pengecekan Wajah
-  - Menyesuaikan waktu berdasarkan zona waktu pengguna
-  - Mengirim notifikasi saat lupa absen keluar
+#### 👥 Karyawan
 
----
+- Absensi masuk & keluar
+- Lihat histori absensi
+- Ajukan cuti/izin
 
-## Non-Functional Requirements
+#### 👨‍💼 Admin
 
-| Kebutuhan               | Detail                                                         |
-| ----------------------- | -------------------------------------------------------------- |
-| Ketersediaan            | 99.9% waktu aktif, ketersediaan tinggi via infrastruktur cloud |
-| Skalabilitas            | Mampu menangani 25.000+ karyawan aktif secara paralel          |
-| Keamanan                | Otentikasi JWT, SSL/TLS, enkripsi foto wajah, anti-pemalsuan   |
-| Performa                | Waktu respons < 300ms untuk permintaan absensi                 |
-| Kompatibilitas          | Aplikasi Mobile (Android/iOS), Browser Web                     |
-| Pencatatan & Pemantauan | Tersedia log aktivitas, pelacakan kesalahan, dan sistem audit  |
-| Cadangan                | Cadangan harian database absensi dan metadata selfie           |
+- Dashboard laporan absensi
+- Monitor anomali
+- Manajemen jadwal kerja
+- Ekspor laporan
 
----
+#### 🤖 Sistem
 
-## Core Entities (ERD)
+- Deteksi kecurangan
+- Manajemen zona waktu
+- Sistem notifikasi
+
+### Kebutuhan Non-Fungsional
+
+| Aspek             | Spesifikasi            |
+| ----------------- | ---------------------- |
+| 🔄 Ketersediaan   | 99.9% uptime           |
+| 📈 Skalabilitas   | 25.000+ pengguna aktif |
+| 🔒 Keamanan       | JWT, SSL/TLS, Enkripsi |
+| ⚡ Performa       | Respons < 300ms        |
+| 📱 Kompatibilitas | Mobile & Web           |
+| 📊 Monitoring     | Log & Audit Trail      |
+| 💾 Backup         | Daily Backup           |
+
+## 📚 Entitas Database
 
 1. Users
 
@@ -239,7 +252,7 @@ Sistem ini dirancang untuk mendukung kebutuhan 25.000+ karyawan dari sebuah peru
    - Pengguna dapat membuat laporan absensi.
    - Pengguna dapat membuat laporan cuti.
    - Pengguna dapat membuat laporan ringkasan absensi.
-10. **Dasbor Admin**
+10. **Dasboard Admin**
     - Admin dapat melihat ringkasan absensi.
     - Admin dapat melihat riwayat absensi.
     - Admin dapat melihat peta absensi.
