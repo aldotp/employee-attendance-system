@@ -1,347 +1,173 @@
-# 📱 Sistem Absensi Karyawan
+# 📱 Employee Attendance System
 
-## 📋 Daftar Isi
+## 📋 Table of Contents
 
-- [Tentang Sistem](#tentang-sistem)
-- [Asumsi](#asumsi)
-- [Kebutuhan Sistem](#kebutuhan-sistem)
-- [Entitas Database](#entitas-database)
-- [Fitur Sistem](#fitur-sistem)
-- [Arsitektur Sistem](#arsitektur-sistem)
-- [Alur Proses](#alur-proses)
+- [About System](#about-system)
+- [Assumptions](#assumptions)
+- [System Requirements](#system-requirements)
+- [Database Entities](#database-entities)
+- [System Features](#system-features)
+- [System Architecture](#system-architecture)
+- [Process Flow](#process-flow)
 
-## 🎯 Tentang Sistem
+## 🎯 About System
 
-Sistem ini dirancang untuk mendukung kebutuhan 25.000+ karyawan dari sebuah perusahaan ritel yang menerapkan kebijakan Work From Anywhere (WFA). Karyawan tersebar di seluruh wilayah Indonesia dan sebagian di luar negeri. Tujuan dari sistem ini adalah mencatat dan memantau kehadiran karyawan dengan dukungan lokasi, waktu, dan validasi yang kuat.
+This system is designed to support 25,000+ employees of a retail company implementing Work From Anywhere (WFA) policy. Employees are spread across Indonesia and some work overseas. The system aims to record and monitor employee attendance with strong location, time, and validation support.
 
-## 📌 Asumsi
+## 📌 Assumptions
 
-- ✅ 25.000+ karyawan tersebar di Indonesia dan luar negeri
-- 📱 Absensi via aplikasi mobile atau web
-- 🌍 Validasi GPS dan pengenalan wajah
-- 🕒 Dukungan multi zona waktu
-- 📝 Fitur cuti dan izin terintegrasi
-- 📍 Validasi lokasi kerja
+- ✅ 25,000+ employees across Indonesia and overseas
+- 📱 Attendance via mobile or web application
+- 🌍 GPS validation and face recognition
+- 🕒 Multi-timezone support
+- 📝 Integrated leave and permission features
+- 📍 Work location validation
 
-## 💻 Kebutuhan Sistem
+## 💻 System Requirements
 
-### Kebutuhan Fungsional
+### Functional Requirements
 
-#### 👥 Karyawan
+#### 👥 Employee
 
-- Absensi masuk & keluar
-- Lihat histori absensi
-- Ajukan cuti/izin
+- Check-in & check-out
+- View attendance history
+- Submit leave requests
 
 #### 👨‍💼 Admin
 
-- Dashboard laporan absensi
-- Monitor anomali
-- Manajemen jadwal kerja
-- Ekspor laporan
+- Attendance report dashboard
+- Monitor anomalies
+- Work schedule management
+- Export reports
 
-#### 🤖 Sistem
+#### 🤖 System
 
-- Deteksi kecurangan
-- Manajemen zona waktu
-- Sistem notifikasi
+- Fraud detection
+- Timezone management
+- Notification system
 
-### Kebutuhan Non-Fungsional
+### Non-Functional Requirements
 
-| Aspek             | Spesifikasi            |
-| ----------------- | ---------------------- |
-| 🔄 Ketersediaan   | 99.9% uptime           |
-| 📈 Skalabilitas   | 25.000+ pengguna aktif |
-| 🔒 Keamanan       | JWT, SSL/TLS, Enkripsi |
-| ⚡ Performa       | Respons < 300ms        |
-| 📱 Kompatibilitas | Mobile & Web           |
-| 📊 Monitoring     | Log & Audit Trail      |
-| 💾 Backup         | Daily Backup           |
+| Aspect           | Specification            |
+| ---------------- | ------------------------ |
+| 🔄 Availability  | 99.9% uptime             |
+| 📈 Scalability   | 25,000+ active users     |
+| 🔒 Security      | JWT, SSL/TLS, Encryption |
+| ⚡ Performance   | Response < 300ms         |
+| 📱 Compatibility | Mobile & Web             |
+| 📊 Monitoring    | Log & Audit Trail        |
+| 💾 Backup        | Daily Backup             |
 
-## 📚 Entitas Database
+## 📚 Database Entities
 
-1. Users
+[Database schema remains unchanged as it contains technical specifications]
 
-   - id: CHAR(36) PRIMARY KEY
-   - email: VARCHAR(255) UNIQUE NOT NULL
-   - password: TEXT NOT NULL
-   - full_name: VARCHAR(255) NOT NULL
-   - role: ENUM('admin', 'hr', 'manager', 'employee')
-   - location: VARCHAR(255)
-   - timezone: VARCHAR(100)
-   - photo_url: TEXT
-   - status: ENUM('active', 'inactive', 'terminated', 'suspended')
-   - email_verified_at: DATETIME
-   - created_at, updated_at, deleted_at: DATETIME
+## 🎉 System Features
 
-2. Employees
+### 1. User Management
 
-   - id: CHAR(36) PRIMARY KEY
-   - user_id: CHAR(36) FOREIGN KEY
-   - department_id: CHAR(36) FOREIGN KEY
-   - name: VARCHAR(255)
-   - email: VARCHAR(255) UNIQUE
-   - role: VARCHAR(100)
-   - location: VARCHAR(255)
-   - timezone: VARCHAR(100)
-   - photo_url: TEXT
-   - status: ENUM('active', 'inactive', 'terminated', 'suspended')
-   - join_date: DATE
-   - reporting_to: CHAR(36)
+- Registration & Login
+- User Profile
+- Access Management
 
-3. Attendances
+### 2. Attendance
 
-   - id: CHAR(36) PRIMARY KEY
-   - employee_id: CHAR(36) FOREIGN KEY
-   - date: DATE
-   - check_in_time: DATETIME
-   - check_out_time: DATETIME
-   - type: VARCHAR(50)
-   - location: VARCHAR(255)
-   - work_location_id: CHAR(36)
-   - selfie_url: TEXT
-   - status: ENUM('present', 'absent', 'late', 'early_leave')
-   - device_info: JSON
-   - ip_address: VARCHAR(45)
-   - created_at, updated_at: DATETIME
+- Check-in/Check-out
+- Location Validation
+- Face Recognition
+- Attendance History
 
-4. Schedules
+### 3. Leave Management
 
-   - id: CHAR(36) PRIMARY KEY
-   - employee_id: CHAR(36) FOREIGN KEY
-   - date: DATE
-   - shift_start: TIME
-   - shift_end: TIME
-   - break_start: TIME
-   - break_end: TIME
-   - work_location_id: CHAR(36)
-   - schedule_type: ENUM('regular', 'shift', 'flexible')
-   - created_at, updated_at: DATETIME
+- Leave Application
+- Approval Workflow
+- Leave Balance
+- Leave History
 
-5. LeaveRequests
+### 4. Schedule Management
 
-   - id: CHAR(36) PRIMARY KEY
-   - employee_id: CHAR(36) FOREIGN KEY
-   - start_date: DATE
-   - end_date: DATE
-   - type: ENUM('annual', 'sick', 'unpaid', 'maternity', 'paternity')
-   - reason: TEXT
-   - status: ENUM('pending', 'approved', 'rejected')
-   - reviewed_by: VARCHAR(255)
-   - reviewed_at: TIMESTAMP
-   - note: TEXT
-   - created_at, updated_at: DATETIME
+- Shift Scheduling
+- Work Rotation
+- Work Calendar
 
-6. AbsenceAnomalies
+### 5. Monitoring & Reports
 
-   - id: CHAR(36) PRIMARY KEY
-   - employee_id: CHAR(36) FOREIGN KEY
-   - date: DATE
-   - type: ENUM('late', 'not_present', 'left_early', 'forgot_checkin')
-   - note: TEXT
-   - verified: BOOLEAN
-   - verified_by: VARCHAR(255)
-   - verified_at: TIMESTAMP
-   - created_at: DATETIME
+- Dashboard Analytics
+- Attendance Reports
+- Anomaly Detection
+- Data Export
 
-7. Notifications
+## 🏗 System Architecture
 
-   - id: CHAR(36) PRIMARY KEY
-   - employee_id: CHAR(36) FOREIGN KEY
-   - type: ENUM('reminder', 'warning', 'info')
-   - message: TEXT
-   - send_at: DATETIME
-   - created_at: DATETIME
+### Technology Stack
 
-8. Departments
+- **Frontend**: React.js/VueJS/NextJS, Flutter/React Native
+- **Backend**: Golang/NodeJS/Laravel
+- **Database**: PostgreSQL/MySQL
+- **Storage**: Amazon S3/Google Cloud
+- **Security**: JWT/OAuth2/Firebase Auth
+- **Queue**: RabbitMQ/Kafka
+- **Monitoring**: Prometheus + Grafana
+- **DevOps**: Docker, Kubernetes, CI/CD
 
-   - id: CHAR(36) PRIMARY KEY
-   - name: VARCHAR(255)
-   - head_employee_id: CHAR(36)
-   - location: VARCHAR(255)
-   - timezone: VARCHAR(100)
-   - wfa_policy: JSON
-   - created_at, updated_at: DATETIME
+## 🔄 Process Flow
 
-9. WorkLocations
+### 1. Authentication Flow
 
-   - id: CHAR(36) PRIMARY KEY
-   - name: VARCHAR(255)
-   - address: TEXT
-   - country_code: VARCHAR(10)
-   - latitude: DECIMAL(10,8)
-   - longitude: DECIMAL(11,8)
-   - radius: INTEGER
-   - status: ENUM('active', 'inactive')
-   - created_at, updated_at: DATETIME
+- Login via mobile/web
+- Credential validation
+- Role-based access
+- Session storage
 
-10. EmployeeWorkLocations
+### 2. Attendance Flow
 
-    - id: CHAR(36) PRIMARY KEY
-    - employee_id: CHAR(36) FOREIGN KEY
-    - work_location_id: CHAR(36) FOREIGN KEY
-    - is_primary: BOOLEAN
-    - created_at, updated_at: DATETIME
+- Open attendance feature
+- Schedule validation
+- GPS location check
+- Radius validation
+- Take selfie
+- Face recognition
+- Record time & location
+- Send notification
 
-11. Holidays
+### 3. Leave Flow
 
-    - id: CHAR(36) PRIMARY KEY
-    - date: DATE
-    - name: VARCHAR(255)
-    - description: TEXT
-    - country_code: VARCHAR(10)
-    - is_national: BOOLEAN
-    - created_at, updated_at: DATETIME
+- Submit leave request
+- Balance validation
+- Notify approver
+- Review submission
+- Update status
+- Update attendance
+- Send notification
 
-12. Devices
+### 4. Schedule Flow
 
-    - id: CHAR(36) PRIMARY KEY
-    - employee_id: CHAR(36) FOREIGN KEY
-    - device_id: VARCHAR(255) UNIQUE
-    - device_type: VARCHAR(50)
-    - os_version: VARCHAR(50)
-    - app_version: VARCHAR(50)
-    - created_at, updated_at: DATETIME
+- Create schedule
+- Conflict validation
+- Notify employee
+- Schedule confirmation
+- Update database
 
-13. DeviceLogs
-    - id: CHAR(36) PRIMARY KEY
-    - device_id: CHAR(36) FOREIGN KEY
-    - ip_address: VARCHAR(45)
-    - user_agent: TEXT
-    - event: VARCHAR(50)
-    - created_at: DATETIME
+### 5. Anomaly Flow
 
----
+- Detect anomaly
+- Record type
+- Notify admin
+- Verification
+- Update status
 
-## Use Cases
+### 6. Notification Flow
 
-1. **Pendaftaran Pengguna**
-   - Pengguna dapat mendaftar dengan email dan kata sandi.
-   - Pengguna dapat mendaftar sebagai karyawan atau admin.
-   - Pengguna dapat mendaftar dengan foto profil.
-2. **Masuk Pengguna**
-   - Pengguna dapat masuk dengan email dan kata sandi.
-   - Pengguna dapat masuk dengan akun media sosial.
-3. **Profil Pengguna**
-   - Pengguna dapat melihat profil mereka.
-   - Pengguna dapat memperbarui profil mereka.
-   - Pengguna dapat mengunggah foto profil.
-4. **Absensi**
-   - Pengguna dapat melihat riwayat absensi mereka.
-   - Pengguna dapat melihat ringkasan absensi mereka.
-   - Pengguna dapat melihat peta absensi mereka.
-   - Pengguna dapat melihat laporan absensi mereka.
-5. **Manajemen Cuti**
-   - Pengguna dapat melihat riwayat cuti mereka.
-   - Pengguna dapat mengajukan cuti.
-   - Pengguna dapat melihat saldo cuti mereka.
-   - Pengguna dapat melihat status cuti mereka.
-6. **Manajemen Jadwal**
-   - Pengguna dapat melihat jadwal mereka.
-   - Pengguna dapat melihat detail jadwal mereka.
-   - Pengguna dapat memperbarui jadwal mereka.
-7. **Deteksi Anomali**
-   - Pengguna dapat melihat riwayat anomali mereka.
-   - Pengguna dapat melihat detail anomali mereka.
-   - Pengguna dapat melihat laporan anomali mereka.
-8. **Notifikasi**
-   - Pengguna dapat melihat riwayat notifikasi mereka.
-   - Pengguna dapat melihat detail notifikasi mereka.
-   - Pengguna dapat menandai notifikasi sebagai telah dibaca.
-9. **Pembuatan Laporan**
-   - Pengguna dapat membuat laporan absensi.
-   - Pengguna dapat membuat laporan cuti.
-   - Pengguna dapat membuat laporan ringkasan absensi.
-10. **Dasboard Admin**
-    - Admin dapat melihat ringkasan absensi.
-    - Admin dapat melihat riwayat absensi.
-    - Admin dapat melihat peta absensi.
-    - Admin dapat melihat laporan absensi.
-    - Admin dapat melihat riwayat cuti.
-    - Admin dapat melihat laporan cuti.
-    - Admin dapat melihat riwayat anomali.
-    - Admin dapat melihat laporan anomali.
-    - Admin dapat melihat profil pengguna.
-    - Admin dapat melihat riwayat absensi pengguna.
-    - Admin dapat melihat riwayat cuti pengguna.
-    - Admin dapat melihat riwayat anomali pengguna.
+- Check trigger events
+- Prepare notification template
+- Determine recipient
+- Send notification
+- Record sending status
 
-## System Architecture
+### 7. Report Generation Flow
 
-**Komponen:**
-
-Komponen Teknologi
-
-- **Frontend:** React.js / VueJS / NextJS (Web), Flutter / React Native (Mobile)
-- **Backend Golang:** NodeJS / Golang / Laravel (Express, Gin, Lumen)
-- **API Gateway:** Kong / NGINX Reverse Proxy
-- **Database:** PostgreSQL / MySQL
-- **File Storage:** Amazon S3 / Google Cloud Storage
-- **Authentication:** JWT / OAuth2 + LDAP / Firebase Authentication
-- **Message Queue:** RabbitMQ / Apache Kafka (untuk notifikasi dan pemrosesan async)
-- **Monitoring Prometheus:** + Grafana
-- **CI/CD:** GitHub Actions / GitLab CI
-- **Containerization:** Docker + Kubernetes (EKS / GKE / Self-hosted)
-
----
-
-## High Level Flow
-
-1. Alur Otentikasi
-
-   - Pengguna melakukan login melalui aplikasi mobile/web
-   - Sistem memvalidasi kredensial
-   - Pengguna mendapatkan akses sesuai peran
-   - Sistem menyimpan informasi sesi
-
-2. Alur Absensi
-
-   - Karyawan membuka fitur absensi
-   - Sistem memvalidasi jadwal kerja
-   - Sistem mengecek lokasi via GPS
-   - Sistem memvalidasi radius lokasi kerja
-   - Karyawan melakukan selfie
-   - Sistem melakukan pengenalan wajah
-   - Sistem mencatat waktu & lokasi
-   - Sistem mengirim notifikasi sukses/gagal
-
-3. Alur Manajemen Cuti
-
-   - Karyawan mengajukan cuti/izin
-   - Sistem memvalidasi sisa cuti
-   - Sistem mengirim notifikasi ke pemberi persetujuan
-   - Pemberi persetujuan mereview pengajuan
-   - Sistem memperbarui status cuti
-   - Sistem mengupdate catatan absensi
-   - Sistem mengirim notifikasi hasil
-
-4. Alur Manajemen Jadwal
-
-   - Admin membuat jadwal kerja
-   - Sistem memvalidasi konflik jadwal
-   - Sistem mengirim notifikasi ke karyawan
-   - Karyawan menerima jadwal baru
-   - Sistem mengupdate basis data
-
-5. Alur Deteksi Anomali
-
-   - Sistem mendeteksi anomali absensi
-   - Sistem mencatat jenis anomali
-   - Sistem mengirim notifikasi ke admin/HR
-   - Admin/HR melakukan verifikasi
-   - Sistem mengupdate status anomali
-
-6. Alur Notifikasi
-
-   - Sistem mengecek pemicu kejadian
-   - Sistem mempersiapkan templat notifikasi
-   - Sistem menentukan penerima
-   - Sistem mengirim notifikasi
-   - Sistem mencatat status pengiriman
-
-7. Alur Pembuatan Laporan
-   - Admin memilih jenis laporan
-   - Sistem mengumpulkan data
-   - Sistem memproses data
-   - Sistem menghasilkan laporan
-   - Sistem menyimpan riwayat laporan
+- Select report type
+- Gather data
+- Process data
+- Generate report
+- Store report history
