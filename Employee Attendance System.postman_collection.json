@@ -57,7 +57,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"start_date\":\"2025-05-14\",\n    \"end_date\":\"2025-05-15\",\n    \"type\":\"sick\",\n    \"reason\":\"sakit perut\"\n}",
+							"raw": "{\n    \"start_date\":\"2025-05-14\",\n    \"end_date\":\"2025-05-15\",\n    \"type\":\"sick\",\n    \"reason\":\"opname rumah sakit\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -122,7 +122,7 @@
 							"variable": [
 								{
 									"key": "id",
-									"value": "9dbe2033-490d-41ef-ac48-15d349e510f4"
+									"value": "127dd16b-9e6d-4745-a1f9-6f8af5e6c8bc"
 								}
 							]
 						}
@@ -171,7 +171,7 @@
 							"variable": [
 								{
 									"key": "id",
-									"value": ""
+									"value": "6cfb4e45-0cba-4d7f-a200-5ed3a9ec5542"
 								}
 							]
 						}
@@ -444,6 +444,38 @@
 					"response": []
 				},
 				{
+					"name": "Read Notification",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/v1/notification/e2f1095b-09ca-4b87-a94d-4bb577a59b64",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"notification",
+								"e2f1095b-09ca-4b87-a94d-4bb577a59b64"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Edit Notifications",
 					"request": {
 						"auth": {
@@ -608,7 +640,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "\n{\n    \"user_id\": \"b4f7a553-f6fe-48db-903b-8446864f3178\",\n    \"date\": \"2025-05-14T15:04:05Z\",\n    \"shift_start\": \"09:00:00\",\n    \"shift_end\": \"17:00:00\",\n    \"break_start\": \"12:00:00\",\n    \"break_end\": \"13:00:00\",\n    \"work_location_id\": \"550e8400-e29b-41d4-a716-446655440002\",\n    \"schedule_type\": \"regular\",\n    \"created_at\": \"2023-10-14T12:00:00Z\",\n    \"updated_at\": \"2023-10-14T12:00:00Z\"\n}",
+							"raw": "\n{\n    \"user_id\": \"37852023-fc3f-4a00-8e0c-cbdc87150ca7\",\n    \"date\": \"2025-05-14T15:04:05Z\",\n    \"shift_start\": \"09:00:00\",\n    \"shift_end\": \"17:00:00\",\n    \"break_start\": \"12:00:00\",\n    \"break_end\": \"13:00:00\",\n    \"work_location_id\": \"550e8400-e29b-41d4-a716-446655440002\",\n    \"schedule_type\": \"regular\",\n    \"created_at\": \"2023-10-14T12:00:00Z\",\n    \"updated_at\": \"2023-10-14T12:00:00Z\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -643,7 +675,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"admin\",\n    \"email\":\"admin@gmail.com\",\n    \"password\":\"12345678a\",\n    \"full_name\":\"testing yagesya\",\n    \"location\": \"Yogyakarta\",\n    \"timezone\": \"UT7\",\n    \"department\": \"Information Technology\",\n    \"photo_Url\":\"https://google.com\"\n}",
+							"raw": "{\n    \"name\": \"admin24\",\n    \"email\":\"admin24@gmail.com\",\n    \"password\":\"12345678a\",\n    \"full_name\":\"testing yagesya\",\n    \"location\": \"Yogyakarta\",\n    \"timezone\": \"UT7\",\n    \"department\": \"Information Technology\",\n    \"photo_Url\":\"https://google.com\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -690,7 +722,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"email\":\"admin@gmail.com\",\n    \"password\":\"12345678a\"\n}",
+							"raw": "{\n    \"email\":\"admin2@gmail.com\",\n    \"password\":\"12345678a\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -741,6 +773,37 @@
 								"v1",
 								"user",
 								"profile"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Department",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/v1/department",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"department"
 							]
 						}
 					},
@@ -874,7 +937,7 @@
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8080/api/v1/admin/users/861241ac-3a1c-4f81-a34d-476cf0e15912",
+							"raw": "http://localhost:8080/api/v1/admin/users/:id",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -885,7 +948,13 @@
 								"v1",
 								"admin",
 								"users",
-								"861241ac-3a1c-4f81-a34d-476cf0e15912"
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "d32ece70-1867-4fb6-891f-d6944c672a2a"
+								}
 							]
 						}
 					},
@@ -993,6 +1062,38 @@
 								"v1",
 								"monitoring",
 								"dashboard"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Monitoring Dashboard Attendance Report",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/v1/monitoring/attendance-report",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"monitoring",
+								"attendance-report"
 							]
 						}
 					},
