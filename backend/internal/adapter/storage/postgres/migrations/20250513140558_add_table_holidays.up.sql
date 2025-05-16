@@ -1,0 +1,12 @@
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+CREATE TABLE holidays (
+    id UUID PRIMARY KEY,
+    date DATE NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    country_code VARCHAR(10),
+    is_national BOOLEAN DEFAULT true,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

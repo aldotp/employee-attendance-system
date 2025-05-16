@@ -138,6 +138,7 @@ func (s *LeaveService) SendLeaveNotification(ctx context.Context, userID string,
 		ID:        uuid.New().String(),
 		UserID:    userID,
 		Type:      domain.NotificationTypeInfo,
+		SendAt:    time.Now(),
 		Message:   fmt.Sprintf("Your leave request for %s has been %s.", leaveType, status),
 		CreatedAt: time.Now(),
 	})

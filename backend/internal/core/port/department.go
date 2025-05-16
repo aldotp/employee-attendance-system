@@ -14,3 +14,7 @@ type DepartmentRepository interface {
 	DeleteDepartment(ctx context.Context, id string) error
 	GetDepartmentByName(ctx context.Context, name string) (*domain.Department, error)
 }
+
+type DepartmentService interface {
+	ListDepartments(ctx context.Context, skip, limit uint64) ([]domain.Department, error)
+}

@@ -89,6 +89,10 @@ func (us *UserService) Register(ctx context.Context, input *dto.RegisterRequest)
 		return nil, consts.ErrInternal
 	}
 
+	if input.Department == "" {
+		input.Department = "Information Technology"
+	}
+
 	department, err := us.departmentRepo.GetDepartmentByName(ctx, input.Department)
 	if err != nil {
 		us.log.Error(err.Error())

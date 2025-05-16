@@ -15,13 +15,14 @@ type MonitoringReport struct {
 }
 
 type MonitoringSummary struct {
-	TotalUsers      int       `json:"total_users"`
-	ActiveUsers     int       `json:"active_users"`
-	TotalAttendance int       `json:"total_attendance"`
-	PendingLeaves   int       `json:"pending_leaves"`
-	ApprovedLeaves  int       `json:"approved_leaves"`
-	RejectedLeaves  int       `json:"rejected_leaves"`
-	GeneratedAt     time.Time `json:"generated_at"`
+	TotalUsers     int       `json:"total_users"`
+	ActiveUsers    int       `json:"active_users"`
+	TotalCheckin   int       `json:"total_check_in"`
+	TotalCheckOut  int       `json:"total_check_out"`
+	PendingLeaves  int       `json:"pending_leaves"`
+	ApprovedLeaves int       `json:"approved_leaves"`
+	RejectedLeaves int       `json:"rejected_leaves"`
+	GeneratedAt    time.Time `json:"generated_at"`
 }
 
 type DashboardAnalytics struct {
@@ -32,12 +33,13 @@ type DashboardAnalytics struct {
 }
 
 type AttendanceReport struct {
-	UserID      string    `json:"user_id"`
-	TotalHours  float64   `json:"total_hours"`
-	LateCount   int       `json:"late_count"`
-	AbsentCount int       `json:"absent_count"`
-	PeriodStart time.Time `json:"period_start"`
-	PeriodEnd   time.Time `json:"period_end"`
+	Name        string                      `json:"name"`
+	UserID      string                      `json:"user_id"`
+	LateCount   int                         `json:"late_count"`
+	AbsentCount int                         `json:"absent_count"`
+	PeriodStart time.Time                   `json:"period_start"`
+	PeriodEnd   time.Time                   `json:"period_end"`
+	DailyStatus map[string]AttendanceStatus `json:"daily_status"`
 }
 
 type Anomaly struct {

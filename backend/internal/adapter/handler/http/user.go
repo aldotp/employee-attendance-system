@@ -35,6 +35,10 @@ func (uh *UserHandler) Register(c *gin.Context) {
 
 	createdUser, err := uh.svc.Register(c.Request.Context(), &req)
 	if err != nil {
+		if err == consts.ErrEmailAlreadyExist {
+			c.JSON(http.StatusBadRequest, util.APIResponse("Email already exist", http.StatusBadRequest, "error", nil))
+			return
+		}
 		uh.logger.Error("Registration failed", zap.Error(err))
 		c.JSON(http.StatusInternalServerError, util.APIResponse("Registration failed", http.StatusInternalServerError, "error", nil))
 		return

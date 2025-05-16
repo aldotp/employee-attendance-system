@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"sync"
 	"time"
 
 	"github.com/aldotp/employee-attendance-system/internal/core/domain"
@@ -14,12 +15,16 @@ import (
 )
 
 type MonitoringService struct {
-	repo port.MonitoringRepository
+	repo           port.MonitoringRepository
+	userRepo       port.UserRepository
+	attendanceRepo port.AttendanceRepository
 }
 
-func NewMonitoringService(repo port.MonitoringRepository) *MonitoringService {
+func NewMonitoringService(repo port.MonitoringRepository, userRepo port.UserRepository, attendanceRepo port.AttendanceRepository) *MonitoringService {
 	return &MonitoringService{
-		repo: repo,
+		repo:           repo,
+		userRepo:       userRepo,
+		attendanceRepo: attendanceRepo,
 	}
 }
 
@@ -32,15 +37,45 @@ func (ms *MonitoringService) GetSummary(ctx context.Context, date string) (*doma
 }
 
 func (ms *MonitoringService) GetDashboardAnalytics(ctx context.Context, date string) (*domain.DashboardAnalytics, error) {
-	// Get basic analytics data
 	summary, err := ms.repo.GetSummary(ctx, date)
 	if err != nil {
 		return nil, err
 	}
 
-	// Create dashboard analytics
+	var startOfWeek time.Time
+	if date != "" {
+		parsedDate, err := time.Parse("2006-01-02", date)
+		if err != nil {
+			return nil, err
+		}
+		weekday := int(parsedDate.Weekday())
+		if weekday == 0 {
+			weekday = 7
+		}
+		startOfWeek = parsedDate.AddDate(0, 0, -(weekday - 1))
+	} else {
+		now := time.Now()
+		weekday := int(now.Weekday())
+		if weekday == 0 {
+			weekday = 7
+		}
+		startOfWeek = now.AddDate(0, 0, -(weekday - 1))
+	}
+
+	weeklyAttendance := make([]int, 7)
+	for i := 0; i < 7; i++ {
+		day := startOfWeek.AddDate(0, 0, i)
+		dayStr := day.Format("2006-01-02")
+		summaryDay, err := ms.repo.GetSummary(ctx, dayStr)
+		if err != nil {
+			weeklyAttendance[i] = 0
+			continue
+		}
+		weeklyAttendance[i] = summaryDay.TotalCheckin + summaryDay.TotalCheckOut
+	}
+
 	analytics := &domain.DashboardAnalytics{
-		WeeklyAttendance: []int{summary.TotalAttendance, 0, 0, 0, 0, 0, 0}, // Placeholder
+		WeeklyAttendance: weeklyAttendance,
 		LeaveDistribution: map[string]int{
 			"pending":  summary.PendingLeaves,
 			"approved": summary.ApprovedLeaves,
@@ -52,17 +87,85 @@ func (ms *MonitoringService) GetDashboardAnalytics(ctx context.Context, date str
 	return analytics, nil
 }
 
-func (ms *MonitoringService) GenerateAttendanceReport(ctx context.Context) (*domain.AttendanceReport, error) {
+func (ms *MonitoringService) GenerateAttendanceReport(ctx context.Context) ([]domain.AttendanceReport, error) {
 	now := time.Now()
 	startOfMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
 	endOfMonth := startOfMonth.AddDate(0, 1, 0).Add(-time.Nanosecond)
 
-	report := &domain.AttendanceReport{
-		PeriodStart: startOfMonth,
-		PeriodEnd:   endOfMonth,
+	users, err := ms.userRepo.FindAllWithDetails(ctx)
+	if err != nil {
+		return nil, err
 	}
 
-	return report, nil
+	var (
+		reportsMu sync.Mutex
+		reports   []domain.AttendanceReport
+		wg        sync.WaitGroup
+		errChan   = make(chan error, len(users))
+	)
+
+	daysInMonth := int(endOfMonth.Day())
+
+	for _, user := range users {
+		wg.Add(1)
+		go func(user domain.UserWithEmployee) {
+			defer wg.Done()
+
+			attendances, err := ms.attendanceRepo.GetAttendanceHistory(ctx, user.ID, startOfMonth.Format("2006-01-02"), endOfMonth.Format("2006-01-02"))
+			if err != nil {
+				errChan <- err
+				return
+			}
+
+			attendanceMap := make(map[string]domain.AttendanceStatus)
+			for _, att := range attendances {
+				dayStr := att.Time.Format("2006-01-02")
+				attendanceMap[dayStr] = att.Status
+			}
+
+			var lateCount, absentCount int
+			dailyStatus := make(map[string]domain.AttendanceStatus)
+
+			for i := 0; i < daysInMonth; i++ {
+				day := startOfMonth.AddDate(0, 0, i)
+				dayStr := day.Format("2006-01-02")
+				status, ok := attendanceMap[dayStr]
+				if !ok {
+					status = domain.AttendanceStatusAbsent
+					absentCount++
+				} else {
+					if status == domain.AttendanceStatusLate {
+						lateCount++
+					}
+				}
+				dailyStatus[dayStr] = status
+			}
+
+			report := domain.AttendanceReport{
+				Name:        user.Name,
+				UserID:      user.ID,
+				LateCount:   lateCount,
+				AbsentCount: absentCount,
+				PeriodStart: startOfMonth,
+				PeriodEnd:   endOfMonth,
+				DailyStatus: dailyStatus,
+			}
+
+			reportsMu.Lock()
+			reports = append(reports, report)
+			reportsMu.Unlock()
+		}(user)
+	}
+
+	wg.Wait()
+	close(errChan)
+	for err := range errChan {
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return reports, nil
 }
 
 func (ms *MonitoringService) DetectAnomalies(ctx context.Context) ([]domain.Anomaly, error) {
@@ -87,7 +190,8 @@ func (ms *MonitoringService) ExportData(ctx context.Context, req domain.ExportRe
 		"Report Type",
 		"Total Users",
 		"Active Users",
-		"Total Attendance",
+		"Total Check_In",
+		"Total Check_Out",
 		"Pending Leaves",
 		"Approved Leaves",
 		"Rejected Leaves",
@@ -121,10 +225,11 @@ func (ms *MonitoringService) ExportData(ctx context.Context, req domain.ExportRe
 		excelHandle.SetCellValue(sheet, fmt.Sprintf("B%d", row), report.ReportType)
 		excelHandle.SetCellValue(sheet, fmt.Sprintf("C%d", row), summary.TotalUsers)
 		excelHandle.SetCellValue(sheet, fmt.Sprintf("D%d", row), summary.ActiveUsers)
-		excelHandle.SetCellValue(sheet, fmt.Sprintf("E%d", row), summary.TotalAttendance)
-		excelHandle.SetCellValue(sheet, fmt.Sprintf("F%d", row), summary.PendingLeaves)
-		excelHandle.SetCellValue(sheet, fmt.Sprintf("G%d", row), summary.ApprovedLeaves)
-		excelHandle.SetCellValue(sheet, fmt.Sprintf("H%d", row), summary.RejectedLeaves)
+		excelHandle.SetCellValue(sheet, fmt.Sprintf("E%d", row), summary.TotalCheckin)
+		excelHandle.SetCellValue(sheet, fmt.Sprintf("F%d", row), summary.TotalCheckOut)
+		excelHandle.SetCellValue(sheet, fmt.Sprintf("G%d", row), summary.PendingLeaves)
+		excelHandle.SetCellValue(sheet, fmt.Sprintf("H%d", row), summary.ApprovedLeaves)
+		excelHandle.SetCellValue(sheet, fmt.Sprintf("I%d", row), summary.RejectedLeaves)
 	}
 
 	var b bytes.Buffer

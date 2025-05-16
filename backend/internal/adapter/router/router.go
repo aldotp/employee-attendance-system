@@ -28,6 +28,7 @@ func NewRouter(
 	scheduleHandler *http.ScheduleHandler,
 	monitoringHandler *http.MonitoringHandler,
 	notificationHandler *http.NotificationHandler,
+	departmentHandler *http.DepartmentHandler,
 ) (*Router, error) {
 
 	// Set Gin mode
@@ -116,6 +117,11 @@ func NewRouter(
 			leaveAdmin.POST("/reject/:id", leaveHandler.RejectLeave)
 		}
 
+		department := v1.Group("/department")
+		{
+			department.GET("", departmentHandler.ListDepartments)
+		}
+
 		schedule := v1.Group("/schedule").Use(middleware.AuthMiddleware(token))
 		{
 			schedule.GET("", scheduleHandler.ListSchedules)
@@ -128,7 +134,7 @@ func NewRouter(
 			schedule.POST("/swap", scheduleHandler.RequestScheduleSwap)
 		}
 
-		monitoring := v1.Group("/monitoring").Use(middleware.AuthMiddleware(token))
+		monitoring := v1.Group("/monitoring").Use(middleware.AuthMiddleware(token), middleware.VerifyRole(domain.HR, domain.HR, domain.Admin))
 		{
 			monitoring.GET("/reports", monitoringHandler.GetReports)
 			monitoring.GET("/summary", monitoringHandler.GetSummary)

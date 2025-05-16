@@ -1,0 +1,1 @@
+DROP TABLE absence_anomalies;

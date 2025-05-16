@@ -39,3 +39,23 @@ type User struct {
 	UpdatedAt       time.Time  `json:"updated_at"`
 	DeletedAt       *time.Time `json:"deleted_at"`
 }
+
+type UserWithEmployee struct {
+	ID              string     `json:"id"`
+	Email           string     `json:"email"`
+	Password        string     `json:"-"`
+	Role            string     `json:"role"`
+	EmailVerifiedAt *time.Time `json:"email_verified_at"`
+	CreatedAt       time.Time  `json:"created_at"`
+	UpdatedAt       time.Time  `json:"updated_at"`
+	DeletedAt       *time.Time `json:"deleted_at"`
+	EmployeeID      *string    `json:"employee_id"`
+	Location        *string    `json:"location"`
+	Timezone        *string    `json:"timezone"`
+	PhotoURL        *string    `json:"photo_url"`
+	Status          *string    `json:"status"`
+	ReportingTo     *string    `json:"reporting_to"`
+	Name            string     `json:"name"`
+	DepartmentID    *string    `json:"department_id"`
+	JoinedDate      *time.Time `json:"join_date"`
+}

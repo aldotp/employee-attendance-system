@@ -23,6 +23,7 @@ type UserRepository interface {
 	Create(ctx context.Context, user *domain.User) (*domain.User, error)
 	Update(ctx context.Context, user *domain.User) (*domain.User, error)
 	Delete(ctx context.Context, id string) error
+	FindAllWithDetails(ctx context.Context) ([]domain.UserWithEmployee, error)
 }
 
 type UserService interface {

@@ -66,7 +66,7 @@ func (h *NotificationHandler) ListNotifications(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, util.APIResponse(err.Error(), http.StatusInternalServerError, "error", nil))
 		return
 	}
-	c.JSON(http.StatusOK, util.APIResponse("Success", http.StatusOK, "success", notifications))
+	c.JSON(http.StatusOK, util.APIResponse("Success Get Notifications", http.StatusOK, "success", notifications))
 }
 
 func (h *NotificationHandler) UpdateNotificationStatus(c *gin.Context) {
@@ -84,7 +84,7 @@ func (h *NotificationHandler) UpdateNotificationStatus(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, util.APIResponse(err.Error(), http.StatusInternalServerError, "error", nil))
 		return
 	}
-	c.Status(http.StatusOK)
+	c.JSON(http.StatusOK, util.APIResponse("Success Update Notification", http.StatusOK, "success", nil))
 }
 
 func (h *NotificationHandler) DeleteNotification(c *gin.Context) {
@@ -94,5 +94,5 @@ func (h *NotificationHandler) DeleteNotification(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, util.APIResponse(err.Error(), http.StatusInternalServerError, "error", nil))
 		return
 	}
-	c.Status(http.StatusOK)
+	c.JSON(http.StatusOK, util.APIResponse("Success Delete Notification", http.StatusOK, "success", nil))
 }

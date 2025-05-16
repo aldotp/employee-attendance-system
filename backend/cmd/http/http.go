@@ -21,7 +21,7 @@ func RunHTTPServer(ctx context.Context) {
 	attendanceService := service.NewAttendanceService(f.AttendanceRepo)
 	leaveService := service.NewLeaveService(f.LeaveRequestRepo, f.NotificationRepo)
 	scheduleService := service.NewScheduleService(f.ScheduleRepo)
-	monitoringService := service.NewMonitoringService(f.MonitoringRepo)
+	monitoringService := service.NewMonitoringService(f.MonitoringRepo, f.UserRepo, f.AttendanceRepo)
 	notificationService := service.NewNotificationService(f.NotificationRepo, f.UserRepo)
 
 	// Handlers
@@ -32,6 +32,7 @@ func RunHTTPServer(ctx context.Context) {
 	scheduleHandler := http.NewScheduleHandler(scheduleService)
 	monitoringHandler := http.NewMonitoringHandler(monitoringService)
 	notificationHandler := http.NewNotificationHandler(notificationService)
+	deparmentHandler := http.NewDepartmentHandler(f.DepartmentRepo)
 
 	// HTTP server
 	routes, err := router.NewRouter(
@@ -43,6 +44,7 @@ func RunHTTPServer(ctx context.Context) {
 		scheduleHandler,
 		monitoringHandler,
 		notificationHandler,
+		deparmentHandler,
 	)
 	if err != nil {
 		slog.Error("Error creating router", "error", err)

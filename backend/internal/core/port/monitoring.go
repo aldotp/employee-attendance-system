@@ -10,7 +10,7 @@ type MonitoringService interface {
 	GetReports(ctx context.Context) ([]domain.MonitoringReport, error)
 	GetSummary(ctx context.Context, date string) (*domain.MonitoringSummary, error)
 	GetDashboardAnalytics(context.Context, string) (*domain.DashboardAnalytics, error)
-	GenerateAttendanceReport(ctx context.Context) (*domain.AttendanceReport, error)
+	GenerateAttendanceReport(context.Context) ([]domain.AttendanceReport, error)
 	DetectAnomalies(ctx context.Context) ([]domain.Anomaly, error)
 	ExportData(ctx context.Context, req domain.ExportRequest) (*domain.ExportResponse, error)
 }
