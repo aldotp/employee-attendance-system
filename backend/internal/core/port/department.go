@@ -12,4 +12,5 @@ type DepartmentRepository interface {
 	ListDepartments(ctx context.Context, skip, limit uint64) ([]domain.Department, error)
 	UpdateDepartment(ctx context.Context, department *domain.Department) (*domain.Department, error)
 	DeleteDepartment(ctx context.Context, id string) error
+	GetDepartmentByName(ctx context.Context, name string) (*domain.Department, error)
 }

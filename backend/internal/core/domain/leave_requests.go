@@ -24,7 +24,7 @@ const (
 
 type LeaveRequest struct {
 	ID         string      `json:"id"`
-	EmployeeID string      `json:"employee_id"`
+	UserID     string      `json:"user_id"`
 	StartDate  time.Time   `json:"start_date"`
 	EndDate    time.Time   `json:"end_date"`
 	Type       LeaveType   `json:"type"`

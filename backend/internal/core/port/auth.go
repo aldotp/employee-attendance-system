@@ -10,8 +10,8 @@ import (
 //go:generate mockgen -source=auth.go -destination=mock/auth.go -package=mock
 
 type TokenInterface interface {
-	GenerateAccessToken(user *domain.User, employee *domain.Employee) (string, error)
-	GenerateRefreshToken(user *domain.User, employee *domain.Employee) (string, error)
+	GenerateAccessToken(user *domain.User) (string, error)
+	GenerateRefreshToken(user *domain.User) (string, error)
 	VerifyAccessToken(encodedToken string) (*domain.TokenPayload, error)
 	VerifyRefreshToken(ctx context.Context, refreshToken string) (*domain.RefreshTokenPayload, bool, error)
 	GenerateActivationToken(userID uint64) (string, error)

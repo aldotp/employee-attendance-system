@@ -102,8 +102,8 @@ func (s *AttendanceService) SendAttendanceNotification(ctx context.Context, user
 	return errors.New("SendAttendanceNotification not implemented")
 }
 
-func (s *AttendanceService) ListAttendances(ctx context.Context, page, limit uint64) ([]domain.GetAttendanceResponse, error) {
-	return s.repo.ListAttendances(ctx, page, limit)
+func (s *AttendanceService) ListAttendances(ctx context.Context, req domain.ListAttendanceRequest) ([]domain.GetAttendanceResponse, error) {
+	return s.repo.ListAttendances(ctx, req.Page, req.Limit, req.Date, req.Type)
 }
 
 func (s *AttendanceService) GetAttendanceByID(ctx context.Context, id string) (*domain.Attendance, error) {

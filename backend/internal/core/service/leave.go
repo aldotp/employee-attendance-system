@@ -14,11 +14,15 @@ import (
 )
 
 type LeaveService struct {
-	repo port.LeaveRequestRepository
+	repo            port.LeaveRequestRepository
+	notificationSvc port.NotificationService
 }
 
-func NewLeaveService(repo port.LeaveRequestRepository) *LeaveService {
-	return &LeaveService{repo: repo}
+func NewLeaveService(repo port.LeaveRequestRepository, notificationService port.NotificationService) *LeaveService {
+	return &LeaveService{
+		repo:            repo,
+		notificationSvc: notificationService,
+	}
 }
 
 func (s *LeaveService) SubmitLeaveRequest(ctx context.Context, req dto.LeaveRequest) (dto.LeaveResponse, error) {
@@ -38,20 +42,29 @@ func (s *LeaveService) SubmitLeaveRequest(ctx context.Context, req dto.LeaveRequ
 	}
 
 	leave := &domain.LeaveRequest{
-		ID:         uuid.New().String(),
-		EmployeeID: req.EmployeeID,
-		Type:       domain.LeaveType(req.Type),
-		StartDate:  startDate,
-		EndDate:    endDate,
-		Reason:     req.Reason,
-		Status:     "pending",
-		CreatedAt:  time.Now(),
-		UpdatedAt:  time.Now(),
+		ID:        uuid.New().String(),
+		UserID:    req.UserID,
+		Type:      domain.LeaveType(req.Type),
+		StartDate: startDate,
+		EndDate:   endDate,
+		Reason:    req.Reason,
+		Status:    "pending",
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
 	}
 	created, err := s.repo.CreateLeaveRequest(ctx, leave)
 	if err != nil {
 		return dto.LeaveResponse{}, err
 	}
+
+	go s.notificationSvc.CreateNotification(ctx, &domain.Notification{
+		ID:        uuid.New().String(),
+		UserID:    leave.UserID,
+		Type:      domain.NotificationTypeInfo,
+		Message:   fmt.Sprintf("Your leave request for %s has been submitted.", leave.Type),
+		CreatedAt: time.Now(),
+	})
+
 	return dto.LeaveResponse{
 		LeaveID:   created.ID,
 		Type:      string(created.Type),
@@ -77,13 +90,31 @@ func (s *LeaveService) ReviewLeaveSubmission(ctx context.Context, leaveID, appro
 	if err != nil {
 		return err
 	}
+
 	if approve {
 		leave.Status = "approved"
-		return s.repo.ApproveLeaveRequest(ctx, leaveID, approverID)
+		err := s.repo.ApproveLeaveRequest(ctx, leaveID, approverID)
+		if err != nil {
+			return err
+		}
 	} else {
 		leave.Status = "rejected"
-		return s.repo.RejectLeaveRequest(ctx, leaveID, approverID, note)
+		err := s.repo.RejectLeaveRequest(ctx, leaveID, approverID, note)
+		if err != nil {
+			return err
+		}
+
 	}
+	go s.notificationSvc.CreateNotification(ctx, &domain.Notification{
+		ID:        uuid.New().String(),
+		UserID:    leave.UserID,
+		Type:      domain.NotificationTypeInfo,
+		Message:   fmt.Sprintf("Your leave request for %s has been %s.", leave.Type, leave.Status),
+		CreatedAt: time.Now(),
+	})
+
+	return nil
+
 }
 
 func (s *LeaveService) UpdateLeaveStatus(ctx context.Context, leaveID string, status string) error {
@@ -102,8 +133,15 @@ func (s *LeaveService) UpdateAttendanceForLeave(ctx context.Context, leaveID str
 	return nil
 }
 
-func (s *LeaveService) SendLeaveNotification(ctx context.Context, userID string) error {
-	// Implementasi dummy, ganti sesuai kebutuhan
+func (s *LeaveService) SendLeaveNotification(ctx context.Context, userID string, leaveType string, status string) error {
+	go s.notificationSvc.CreateNotification(ctx, &domain.Notification{
+		ID:        uuid.New().String(),
+		UserID:    userID,
+		Type:      domain.NotificationTypeInfo,
+		Message:   fmt.Sprintf("Your leave request for %s has been %s.", leaveType, status),
+		CreatedAt: time.Now(),
+	})
+
 	return nil
 }
 
@@ -129,15 +167,15 @@ func (s *LeaveService) CreateLeave(ctx context.Context, req dto.LeaveRequest) (*
 	}
 
 	leave := &domain.LeaveRequest{
-		ID:         uuid.New().String(),
-		EmployeeID: req.EmployeeID,
-		Type:       domain.LeaveType(req.Type),
-		StartDate:  startDate,
-		EndDate:    endDate,
-		Reason:     req.Reason,
-		Status:     "pending",
-		CreatedAt:  time.Now(),
-		UpdatedAt:  time.Now(),
+		ID:        uuid.New().String(),
+		UserID:    req.UserID,
+		Type:      domain.LeaveType(req.Type),
+		StartDate: startDate,
+		EndDate:   endDate,
+		Reason:    req.Reason,
+		Status:    "pending",
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
 	}
 	return s.repo.CreateLeaveRequest(ctx, leave)
 }
@@ -197,12 +235,12 @@ func (s *LeaveService) ApproveLeave(ctx context.Context, leaveID string) error {
 		return fmt.Errorf("leave request is not in pending status")
 	}
 
-	err = s.repo.ApproveLeaveRequest(ctx, leaveID, userSession.EmployeeID)
+	err = s.repo.ApproveLeaveRequest(ctx, leaveID, userSession.UserID)
 	if err != nil {
 		return fmt.Errorf("failed to approve leave request: %w", err)
 	}
 
-	if err := s.SendLeaveNotification(ctx, leave.EmployeeID); err != nil {
+	if err := s.SendLeaveNotification(ctx, leave.UserID, string(leave.Type), "approve"); err != nil {
 		fmt.Printf("failed to send notification: %v", err)
 	}
 
@@ -224,12 +262,12 @@ func (s *LeaveService) RejectLeave(ctx context.Context, leaveID string, reason s
 		return fmt.Errorf("leave request is not in pending status")
 	}
 
-	err = s.repo.RejectLeaveRequest(ctx, leaveID, userSession.EmployeeID, reason)
+	err = s.repo.RejectLeaveRequest(ctx, leaveID, userSession.UserID, reason)
 	if err != nil {
 		return fmt.Errorf("failed to reject leave request: %w", err)
 	}
 
-	if err := s.SendLeaveNotification(ctx, leave.EmployeeID); err != nil {
+	if err := s.SendLeaveNotification(ctx, leave.UserID, string(leave.Type), "reject"); err != nil {
 		fmt.Printf("failed to send notification: %v", err)
 	}
 
@@ -251,7 +289,7 @@ func (s *LeaveService) GetLeaveBalance(ctx context.Context, leaveType string) (f
 	currentYear := time.Now().Year()
 
 	for _, leave := range leaves {
-		if leave.EmployeeID == userSession.EmployeeID &&
+		if leave.UserID == userSession.UserID &&
 			string(leave.Type) == leaveType &&
 			leave.Status == "approved" &&
 			leave.StartDate.Year() == currentYear {

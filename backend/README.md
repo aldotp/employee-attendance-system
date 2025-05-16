@@ -176,9 +176,17 @@ This system is designed to support 25,000+ employees of a retail company impleme
 
 ### How tu run
 
+#### Run the Rest Api
+
+```shell
+go run cmd/main.go rest
+```
+
+### Run Worker Generate Reporting
+
 ```shell
 # Up the migration
-go run cmd/main.go rest
+go run cmd/main.go consumer generate_reporting
 ```
 
 ## Run Migrations

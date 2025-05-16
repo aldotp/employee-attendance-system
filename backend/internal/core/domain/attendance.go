@@ -38,3 +38,10 @@ type GetAttendanceResponse struct {
 	CreatedAt  time.Time        `json:"created_at"`
 	UpdatedAt  time.Time        `json:"updated_at"`
 }
+
+type ListAttendanceRequest struct {
+	Page  uint64 `form:"page"`
+	Limit uint64 `form:"limit"`
+	Date  string `form:"date"`
+	Type  string `form:"type"`
+}

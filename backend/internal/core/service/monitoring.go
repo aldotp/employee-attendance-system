@@ -1,11 +1,16 @@
 package service
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
+	"fmt"
+	"log"
 	"time"
 
 	"github.com/aldotp/employee-attendance-system/internal/core/domain"
 	"github.com/aldotp/employee-attendance-system/internal/core/port"
+	"github.com/xuri/excelize/v2"
 )
 
 type MonitoringService struct {
@@ -22,22 +27,16 @@ func (ms *MonitoringService) GetReports(ctx context.Context) ([]domain.Monitorin
 	return ms.repo.GetReports(ctx)
 }
 
-func (ms *MonitoringService) GetSummary(ctx context.Context) (*domain.MonitoringSummary, error) {
-	return ms.repo.GetSummary(ctx)
+func (ms *MonitoringService) GetSummary(ctx context.Context, date string) (*domain.MonitoringSummary, error) {
+	return ms.repo.GetSummary(ctx, date)
 }
 
-func (ms *MonitoringService) GetDashboardAnalytics(ctx context.Context) (*domain.DashboardAnalytics, error) {
+func (ms *MonitoringService) GetDashboardAnalytics(ctx context.Context, date string) (*domain.DashboardAnalytics, error) {
 	// Get basic analytics data
-	summary, err := ms.repo.GetSummary(ctx)
+	summary, err := ms.repo.GetSummary(ctx, date)
 	if err != nil {
 		return nil, err
 	}
-
-	// Get recent reports
-	// reports, err := ms.repo.GetReports(ctx)
-	// if err != nil {
-	// 	return nil, err
-	// }
 
 	// Create dashboard analytics
 	analytics := &domain.DashboardAnalytics{
@@ -71,12 +70,70 @@ func (ms *MonitoringService) DetectAnomalies(ctx context.Context) ([]domain.Anom
 }
 
 func (ms *MonitoringService) ExportData(ctx context.Context, req domain.ExportRequest) (*domain.ExportResponse, error) {
-	exportResponse := &domain.ExportResponse{
-		FileURL:   "https://example.com/exports/" + req.ReportType + "." + req.Format,
-		ExpiresAt: time.Now().Add(24 * time.Hour),
-		FileSize:  1024,
-		Format:    req.Format,
+	data, err := ms.repo.GetReportByDate(ctx, req)
+	if err != nil {
+		return nil, err
 	}
 
-	return exportResponse, nil
+	excelHandle := excelize.NewFile()
+	defer func() {
+		if err = excelHandle.Close(); err != nil {
+			log.Fatalln(err)
+		}
+	}()
+
+	header := []string{
+		"Date",
+		"Report Type",
+		"Total Users",
+		"Active Users",
+		"Total Attendance",
+		"Pending Leaves",
+		"Approved Leaves",
+		"Rejected Leaves",
+	}
+
+	sheet := "Report"
+	index, err := excelHandle.NewSheet(sheet)
+	if err != nil {
+		return nil, err
+	}
+	excelHandle.SetActiveSheet(index)
+
+	// Write header
+	for i, v := range header {
+		cell, err := excelize.CoordinatesToCellName(i+1, 1)
+		if err != nil {
+			return nil, err
+		}
+		excelHandle.SetCellValue(sheet, cell, v)
+	}
+
+	// Write data
+	for i, report := range data {
+		var summary domain.MonitoringSummary
+		if err := json.Unmarshal([]byte(report.Data), &summary); err != nil {
+			return nil, err
+		}
+
+		row := i + 2
+		excelHandle.SetCellValue(sheet, fmt.Sprintf("A%d", row), report.GeneratedAt.Format("2006-01-02"))
+		excelHandle.SetCellValue(sheet, fmt.Sprintf("B%d", row), report.ReportType)
+		excelHandle.SetCellValue(sheet, fmt.Sprintf("C%d", row), summary.TotalUsers)
+		excelHandle.SetCellValue(sheet, fmt.Sprintf("D%d", row), summary.ActiveUsers)
+		excelHandle.SetCellValue(sheet, fmt.Sprintf("E%d", row), summary.TotalAttendance)
+		excelHandle.SetCellValue(sheet, fmt.Sprintf("F%d", row), summary.PendingLeaves)
+		excelHandle.SetCellValue(sheet, fmt.Sprintf("G%d", row), summary.ApprovedLeaves)
+		excelHandle.SetCellValue(sheet, fmt.Sprintf("H%d", row), summary.RejectedLeaves)
+	}
+
+	var b bytes.Buffer
+	if err := excelHandle.Write(&b); err != nil {
+		return nil, err
+	}
+
+	return &domain.ExportResponse{
+		FileContent: b,
+		FileName:    fmt.Sprintf("report_%s.xlsx", time.Now().Format("20060102_150405")),
+	}, nil
 }

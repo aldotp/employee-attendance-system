@@ -61,7 +61,7 @@ func (h *NotificationHandler) ListNotifications(c *gin.Context) {
 		return
 	}
 
-	notifications, err := h.svc.ListNotifications(c.Request.Context(), userSession.EmployeeID, input.Skip, input.Limit)
+	notifications, err := h.svc.ListNotifications(c.Request.Context(), userSession.UserID, input.Skip, input.Limit)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, util.APIResponse(err.Error(), http.StatusInternalServerError, "error", nil))
 		return

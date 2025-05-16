@@ -40,7 +40,7 @@ func (h *LeaveHandler) CreateLeave(c *gin.Context) {
 		return
 	}
 
-	req.EmployeeID = userSession.EmployeeID
+	req.UserID = userSession.UserID
 	leave, err := h.svc.SubmitLeaveRequest(c.Request.Context(), req)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

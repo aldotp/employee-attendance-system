@@ -10,7 +10,7 @@ import (
 type AttendanceRepository interface {
 	CreateAttendance(ctx context.Context, attendance *domain.Attendance) (*domain.Attendance, error)
 	GetAttendanceByID(ctx context.Context, id string) (*domain.Attendance, error)
-	ListAttendances(ctx context.Context, page, limit uint64) ([]domain.GetAttendanceResponse, error)
+	ListAttendances(ctx context.Context, page, limit uint64, date string, attendanceType string) ([]domain.GetAttendanceResponse, error)
 	UpdateAttendance(ctx context.Context, attendance *domain.Attendance) (*domain.Attendance, error)
 	DeleteAttendance(ctx context.Context, id string) error
 	GetAttendanceHistory(ctx context.Context, employeeID string, startDate, endDate string) ([]domain.Attendance, error)
@@ -25,8 +25,7 @@ type AttendanceService interface {
 	RecordAttendance(ctx context.Context, req dto.AttendanceRequest, userID string) error
 	SendAttendanceNotification(ctx context.Context, userID string) error
 
-	// Tambahan untuk kebutuhan handler RESTful
-	ListAttendances(ctx context.Context, page, limit uint64) ([]domain.Attendance, error)
+	ListAttendances(context.Context, domain.ListAttendanceRequest) ([]domain.GetAttendanceResponse, error)
 	GetAttendanceByID(ctx context.Context, id string) (*domain.Attendance, error)
 	UpdateAttendance(ctx context.Context, id string, req dto.AttendanceRequest) (*domain.Attendance, error)
 	DeleteAttendance(ctx context.Context, id string) error

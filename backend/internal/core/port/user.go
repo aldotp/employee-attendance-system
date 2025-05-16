@@ -18,6 +18,11 @@ type UserRepository interface {
 	ExistEmail(ctx context.Context, email string) (bool, error)
 	CreateUserTx(ctx context.Context, tx pgx.Tx, user *domain.User) (*domain.User, error)
 	BeginTx(ctx context.Context) (pgx.Tx, error)
+	FindAll(ctx context.Context) ([]domain.User, error)
+	FindByID(ctx context.Context, id string) (*domain.User, error)
+	Create(ctx context.Context, user *domain.User) (*domain.User, error)
+	Update(ctx context.Context, user *domain.User) (*domain.User, error)
+	Delete(ctx context.Context, id string) error
 }
 
 type UserService interface {
@@ -26,4 +31,8 @@ type UserService interface {
 	ListUsers(ctx context.Context, skip, limit uint64) ([]domain.User, error)
 	DeleteUser(ctx context.Context, id string) error
 	UpdateProfile(ctx context.Context, input dto.UpdateUserRequest) (*domain.User, error)
+	GetUserByID(ctx context.Context, id string) (*domain.User, error)
+	CreateUser(ctx context.Context, req dto.CreateUserRequest) (*domain.User, error)
+	UpdateUserByID(ctx context.Context, id string, req dto.UpdateUserRequest) (*domain.User, error)
+	DeleteUserByID(ctx context.Context, id string) error
 }

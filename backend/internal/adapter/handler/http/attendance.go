@@ -1,11 +1,11 @@
 package http
 
 import (
-	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/aldotp/employee-attendance-system/internal/adapter/dto"
+	"github.com/aldotp/employee-attendance-system/internal/core/domain"
 	"github.com/aldotp/employee-attendance-system/internal/core/service"
 	"github.com/aldotp/employee-attendance-system/pkg/consts"
 	"github.com/aldotp/employee-attendance-system/pkg/util"
@@ -21,15 +21,13 @@ func NewAttendanceHandler(svc *service.AttendanceService) *AttendanceHandler {
 }
 
 func (h *AttendanceHandler) ListAttendance(c *gin.Context) {
-	page := uint64(1)
-	limit := uint64(10)
-	if p := c.Query("page"); p != "" {
-		fmt.Sscanf(p, "%d", &page)
+
+	var req domain.ListAttendanceRequest
+	if err := c.ShouldBindQuery(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
-	if l := c.Query("limit"); l != "" {
-		fmt.Sscanf(l, "%d", &limit)
-	}
-	attendances, err := h.svc.ListAttendances(c.Request.Context(), page, limit)
+	attendances, err := h.svc.ListAttendances(c.Request.Context(), req)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -100,7 +98,7 @@ func (h *AttendanceHandler) DeleteAttendance(c *gin.Context) {
 }
 
 func (h *AttendanceHandler) GetAttendanceHistory(c *gin.Context) {
-	employeeID := c.Query("employee_id")
+	employeeID := c.Query("user_id")
 	startDate := c.Query("start_date")
 	endDate := c.Query("end_date")
 

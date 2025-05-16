@@ -82,3 +82,73 @@ func (uh *UserHandler) UpdateProfile(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, util.APIResponse("User profile updated", http.StatusOK, "success", updatedUser))
 }
+
+func (h *UserHandler) ListUser(c *gin.Context) {
+	var req dto.ListUserRequest
+	if err := c.ShouldBindQuery(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	users, err := h.svc.ListUsers(c.Request.Context(), req.Page, req.Limit)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, util.APIResponse("List Users Success", http.StatusOK, "success", users))
+}
+
+func (h *UserHandler) GetUserByID(c *gin.Context) {
+	id := c.Param("id")
+	user, err := h.svc.GetUserByID(c.Request.Context(), id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, util.APIResponse("Get User Success", http.StatusOK, "success", user))
+}
+
+func (h *UserHandler) CreateUser(c *gin.Context) {
+	var req dto.CreateUserRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	user, err := h.svc.CreateUser(c.Request.Context(), req)
+	if err != nil {
+		if err == consts.ErrEmailAlreadyExist {
+			c.JSON(http.StatusBadRequest, util.APIResponse("Email already exist", http.StatusBadRequest, "error", nil))
+			return
+		}
+		c.JSON(http.StatusInternalServerError, util.APIResponse("Internal Server Error", http.StatusInternalServerError, "error", nil))
+		return
+	}
+	c.JSON(http.StatusCreated, util.APIResponse("Create User Success", http.StatusCreated, "success", user))
+}
+
+func (h *UserHandler) UpdateUserByID(c *gin.Context) {
+	id := c.Param("id")
+	var req dto.UpdateUserRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	user, err := h.svc.UpdateUserByID(c.Request.Context(), id, req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, util.APIResponse("Update User Success", http.StatusOK, "success", user))
+}
+
+func (h *UserHandler) DeleteUserByID(c *gin.Context) {
+	id := c.Param("id")
+	err := h.svc.DeleteUserByID(c.Request.Context(), id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, util.APIResponse("Delete User Success", http.StatusOK, "success", nil))
+}

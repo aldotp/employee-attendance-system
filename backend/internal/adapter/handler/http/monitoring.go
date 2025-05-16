@@ -2,6 +2,8 @@ package http
 
 import (
 	"net/http"
+	"strconv"
+	"time"
 
 	"github.com/aldotp/employee-attendance-system/internal/core/domain"
 	"github.com/aldotp/employee-attendance-system/internal/core/port"
@@ -29,7 +31,12 @@ func (h *MonitoringHandler) GetReports(c *gin.Context) {
 }
 
 func (h *MonitoringHandler) GetSummary(c *gin.Context) {
-	summary, err := h.svc.GetSummary(c.Request.Context())
+	date := c.Query("date")
+	if date == "" {
+		date = time.Now().Format("2006-01-02")
+	}
+
+	summary, err := h.svc.GetSummary(c.Request.Context(), date)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, util.APIResponse(err.Error(), http.StatusInternalServerError, "error", nil))
 		return
@@ -38,7 +45,12 @@ func (h *MonitoringHandler) GetSummary(c *gin.Context) {
 }
 
 func (h *MonitoringHandler) GetDashboardAnalytics(c *gin.Context) {
-	analytics, err := h.svc.GetDashboardAnalytics(c.Request.Context())
+	date := c.Query("date")
+	if date == "" {
+		date = time.Now().Format("2006-01-02")
+	}
+
+	analytics, err := h.svc.GetDashboardAnalytics(c.Request.Context(), date)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, util.APIResponse(err.Error(), http.StatusInternalServerError, "error", nil))
 		return
@@ -66,15 +78,34 @@ func (h *MonitoringHandler) DetectAnomalies(c *gin.Context) {
 
 func (h *MonitoringHandler) ExportData(c *gin.Context) {
 	var req domain.ExportRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err := c.ShouldBindQuery(&req); err != nil {
 		c.JSON(http.StatusBadRequest, util.APIResponse(err.Error(), http.StatusBadRequest, "error", nil))
 		return
 	}
 
-	data, err := h.svc.ExportData(c.Request.Context(), req)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, util.APIResponse(err.Error(), http.StatusInternalServerError, "error", nil))
+	_, StartDateErr := time.Parse("2006-01-02", req.StartDate)
+	_, EndDateErr := time.Parse("2006-01-02", req.EndDate)
+
+	if StartDateErr != nil || EndDateErr != nil {
+		errorMessage := gin.H{"errors": "please input correct date"}
+		response := util.APIResponse("export data failed", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
 		return
 	}
-	c.JSON(http.StatusOK, util.APIResponse("Success", http.StatusOK, "success", data))
+
+	exportResponse, err := h.svc.ExportData(c.Request.Context(), req)
+	if err != nil {
+		response := util.APIResponse("failed get data", http.StatusBadRequest, "error", err)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	downloadName := exportResponse.FileName
+	bytes := exportResponse.FileContent
+
+	c.Header("Accept-Ranges", "bytes")
+	c.Header("Content-Length", strconv.Itoa(bytes.Len()))
+	c.Header("Content-Description", "File Transfer")
+	c.Header("Content-Disposition", "attachment; filename=\""+downloadName+"\"")
+	c.Data(http.StatusOK, "application/octet-stream", bytes.Bytes())
 }

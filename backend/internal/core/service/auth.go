@@ -41,22 +41,13 @@ func (as *AuthService) Login(ctx context.Context, email, password string) (dto.L
 		return dto.LoginResponse{}, consts.ErrInvalidCredentials
 	}
 
-	employee, err := as.employeeRepo.FindOneByFilters(ctx, map[string]interface{}{"user_id": user.ID})
-	if err != nil {
-		as.log.Error("failed to get employee by ID", zap.Error(err))
-		if err == consts.ErrDataNotFound {
-			return dto.LoginResponse{}, consts.ErrInvalidCredentials
-		}
-		return dto.LoginResponse{}, consts.ErrInternal
-	}
-
-	accessToken, err := as.ts.GenerateAccessToken(user, employee)
+	accessToken, err := as.ts.GenerateAccessToken(user)
 	if err != nil {
 		as.log.Error("failed to generate access token", zap.Error(err))
 		return dto.LoginResponse{}, consts.ErrTokenCreation
 	}
 
-	refreshToken, err := as.ts.GenerateRefreshToken(user, employee)
+	refreshToken, err := as.ts.GenerateRefreshToken(user)
 	if err != nil {
 		as.log.Error("failed to generate refresh token", zap.Error(err))
 		return dto.LoginResponse{}, consts.ErrTokenCreation
@@ -84,16 +75,7 @@ func (as *AuthService) RefreshToken(ctx context.Context, refreshToken string) (s
 		return "", consts.ErrInternal
 	}
 
-	employee, err := as.employeeRepo.FindOneByFilters(ctx, map[string]interface{}{"user_id": user.ID})
-	if err != nil {
-		as.log.Error("failed to get employee by ID", zap.Error(err))
-		if err == consts.ErrDataNotFound {
-			return "", consts.ErrInvalidToken
-		}
-		return "", consts.ErrInternal
-	}
-
-	accessToken, err := as.ts.GenerateAccessToken(user, employee)
+	accessToken, err := as.ts.GenerateAccessToken(user)
 	if err != nil {
 		as.log.Error("failed to generate access token", zap.Error(err))
 		return "", consts.ErrTokenCreation

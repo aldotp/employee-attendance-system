@@ -16,13 +16,13 @@ func RunHTTPServer(ctx context.Context) {
 	f := bootstrap.NewBootstrap(ctx).BuildRestBootstrap()
 
 	// Services
-	userService := service.NewUserService(f.UserRepo, f.EmployeeRepo, f.Cache, f.Token, f.Log)
+	userService := service.NewUserService(f.UserRepo, f.EmployeeRepo, f.DepartmentRepo, f.Cache, f.Token, f.Log)
 	authService := service.NewAuthService(f.UserRepo, f.EmployeeRepo, f.Token, f.Log)
 	attendanceService := service.NewAttendanceService(f.AttendanceRepo)
-	leaveService := service.NewLeaveService(f.LeaveRequestRepo)
+	leaveService := service.NewLeaveService(f.LeaveRequestRepo, f.NotificationRepo)
 	scheduleService := service.NewScheduleService(f.ScheduleRepo)
 	monitoringService := service.NewMonitoringService(f.MonitoringRepo)
-	notificationService := service.NewNotificationService(f.NotificationRepo)
+	notificationService := service.NewNotificationService(f.NotificationRepo, f.UserRepo)
 
 	// Handlers
 	userHandler := http.NewUserHandler(userService, f.Log)

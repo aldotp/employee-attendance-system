@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/aldotp/employee-attendance-system/internal/core/domain"
@@ -10,16 +11,27 @@ import (
 )
 
 type NotificationService struct {
-	repo port.NotificationRepository
+	repo     port.NotificationRepository
+	UserRepo port.UserRepository
 }
 
-func NewNotificationService(repo port.NotificationRepository) *NotificationService {
+func NewNotificationService(repo port.NotificationRepository, UserRepo port.UserRepository) *NotificationService {
 	return &NotificationService{
-		repo: repo,
+		repo:     repo,
+		UserRepo: UserRepo,
 	}
 }
 
 func (ns *NotificationService) CreateNotification(ctx context.Context, notif *domain.Notification) (string, error) {
+
+	_, err := ns.UserRepo.GetUserByID(ctx, notif.UserID)
+	if err != nil {
+		if err.Error() == "data not found" {
+			return "", errors.New("employee not found")
+		}
+		return "", err
+	}
+
 	if notif.ID == "" {
 		notif.ID = uuid.New().String()
 	}

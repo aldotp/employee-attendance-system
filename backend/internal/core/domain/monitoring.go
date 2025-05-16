@@ -1,6 +1,9 @@
 package domain
 
-import "time"
+import (
+	"bytes"
+	"time"
+)
 
 type MonitoringReport struct {
 	ID          string    `json:"id"`
@@ -46,17 +49,15 @@ type Anomaly struct {
 }
 
 type ExportRequest struct {
-	Format     string    `json:"format"`
-	StartDate  time.Time `json:"start_date"`
-	EndDate    time.Time `json:"end_date"`
-	ReportType string    `json:"report_type"`
+	StartDate string `json:"start_date" form:"start_date"`
+	EndDate   string `json:"end_date" form:"end_date"`
+	// Format     string `json:"format"`
+	// ReportType string `json:"report_type"`
 }
 
 type ExportResponse struct {
-	FileURL   string    `json:"file_url"`
-	ExpiresAt time.Time `json:"expires_at"`
-	FileSize  int64     `json:"file_size"`
-	Format    string    `json:"format"`
+	FileContent bytes.Buffer
+	FileName    string
 }
 
 type UserActivity struct {

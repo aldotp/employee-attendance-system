@@ -3,11 +3,11 @@ package dto
 import "time"
 
 type LeaveRequest struct {
-	EmployeeID string `json:"employee_id"`
-	StartDate  string `json:"start_date"`
-	EndDate    string `json:"end_date"`
-	Type       string `json:"type"`
-	Reason     string `json:"reason"`
+	UserID    string `json:"user_id"`
+	StartDate string `json:"start_date"`
+	EndDate   string `json:"end_date"`
+	Type      string `json:"type"`
+	Reason    string `json:"reason"`
 }
 
 type LeaveResponse struct {

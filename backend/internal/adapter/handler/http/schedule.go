@@ -53,7 +53,7 @@ func (h *ScheduleHandler) GetWorkCalendar(c *gin.Context) {
 		return
 	}
 
-	calendar, err := h.scheduleService.GetWorkCalendar(c, userSession.EmployeeID, input.Year, input.Month)
+	calendar, err := h.scheduleService.GetWorkCalendar(c, userSession.UserID, input.Year, input.Month)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -74,7 +74,7 @@ func (h *ScheduleHandler) RequestScheduleSwap(c *gin.Context) {
 		return
 	}
 
-	err := h.scheduleService.RequestScheduleSwap(c, userSession.EmployeeID, req.ScheduleID1, req.ScheduleID2)
+	err := h.scheduleService.RequestScheduleSwap(c, userSession.UserID, req.ScheduleID1, req.ScheduleID2)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

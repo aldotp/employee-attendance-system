@@ -21,13 +21,12 @@ func New() (port.TokenInterface, error) {
 }
 
 // CreateToken generates a new JWT access token for the given user.
-func (pt *JWTToken) GenerateAccessToken(user *domain.User, employee *domain.Employee) (string, error) {
+func (pt *JWTToken) GenerateAccessToken(user *domain.User) (string, error) {
 	claims := jwt.MapClaims{
-		"user_id":     user.ID,
-		"email":       user.Email,
-		"exp":         time.Now().Add(time.Minute * time.Duration(config.AccessTokenExpired())).Unix(),
-		"role":        user.Role,
-		"employee_id": employee.ID,
+		"user_id": user.ID,
+		"email":   user.Email,
+		"exp":     time.Now().Add(time.Minute * time.Duration(config.AccessTokenExpired())).Unix(),
+		"role":    user.Role,
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -41,7 +40,7 @@ func (pt *JWTToken) GenerateAccessToken(user *domain.User, employee *domain.Empl
 }
 
 // GenerateRefreshToken creates a long-lived refresh token for the given user.
-func (pt *JWTToken) GenerateRefreshToken(user *domain.User, employee *domain.Employee) (string, error) {
+func (pt *JWTToken) GenerateRefreshToken(user *domain.User) (string, error) {
 	claims := jwt.MapClaims{
 		"user_id": user.ID,
 		"email":   user.Email,
@@ -79,10 +78,9 @@ func (pt *JWTToken) VerifyAccessToken(encodedToken string) (*domain.TokenPayload
 	}
 
 	return &domain.TokenPayload{
-		UserID:     claims["user_id"].(string),
-		Email:      claims["email"].(string),
-		Role:       domain.UserRole(claims["role"].(string)),
-		EmployeeID: claims["employee_id"].(string),
+		UserID: claims["user_id"].(string),
+		Email:  claims["email"].(string),
+		Role:   domain.UserRole(claims["role"].(string)),
 	}, nil
 }
 

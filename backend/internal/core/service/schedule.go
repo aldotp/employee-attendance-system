@@ -45,8 +45,8 @@ func (s *ScheduleService) GetWorkRotation(ctx context.Context, employeeID string
 	return s.repo.GetWorkRotation(ctx, employeeID)
 }
 
-func (s *ScheduleService) GetWorkCalendar(ctx context.Context, employeeID string, month int, year int) ([]domain.Schedule, error) {
-	return s.repo.GetWorkCalendar(ctx, employeeID, month, year)
+func (s *ScheduleService) GetWorkCalendar(ctx context.Context, userID string, month int, year int) ([]domain.Schedule, error) {
+	return s.repo.GetWorkCalendar(ctx, userID, month, year)
 }
 
 func (s *ScheduleService) RequestScheduleSwap(ctx context.Context, requestorID string, targetScheduleID string, proposedScheduleID string) error {

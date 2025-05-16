@@ -24,7 +24,7 @@ type LeaveService interface {
 	ReviewLeaveSubmission(ctx context.Context, leaveID, approverID string, approve bool, note string) error
 	UpdateLeaveStatus(ctx context.Context, leaveID string, status string) error
 	UpdateAttendanceForLeave(ctx context.Context, leaveID string) error
-	SendLeaveNotification(ctx context.Context, userID string) error
+	SendLeaveNotification(ctx context.Context, userID string, leaveType string, status string) error
 	ApproveLeave(ctx context.Context, leaveID string) error
 	RejectLeave(ctx context.Context, leaveID string, reason string) error
 	GetLeaveBalance(ctx context.Context, leaveType string) (float64, error)

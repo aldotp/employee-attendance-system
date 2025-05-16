@@ -15,20 +15,22 @@ import (
 )
 
 type UserService struct {
-	cache        port.CacheInterface
-	repo         port.UserRepository
-	employeeRepo port.EmployeeRepository
-	token        port.TokenInterface
-	log          *zap.Logger
+	cache          port.CacheInterface
+	repo           port.UserRepository
+	employeeRepo   port.EmployeeRepository
+	departmentRepo port.DepartmentRepository
+	token          port.TokenInterface
+	log            *zap.Logger
 }
 
-func NewUserService(repo port.UserRepository, employeeRepo port.EmployeeRepository, cache port.CacheInterface, token port.TokenInterface, log *zap.Logger) *UserService {
+func NewUserService(repo port.UserRepository, employeeRepo port.EmployeeRepository, departmentRepo port.DepartmentRepository, cache port.CacheInterface, token port.TokenInterface, log *zap.Logger) *UserService {
 	return &UserService{
-		cache:        cache,
-		repo:         repo,
-		employeeRepo: employeeRepo,
-		token:        token,
-		log:          log,
+		cache:          cache,
+		repo:           repo,
+		employeeRepo:   employeeRepo,
+		departmentRepo: departmentRepo,
+		token:          token,
+		log:            log,
 	}
 }
 
@@ -69,17 +71,13 @@ func (us *UserService) Register(ctx context.Context, input *dto.RegisterRequest)
 	}()
 
 	user := &domain.User{
-		ID:        uuid.New().String(),
-		Email:     input.Email,
-		Password:  hashedPassword,
-		FullName:  input.FullName,
-		Location:  input.Location,
-		Timezone:  input.Timezone,
-		PhotoURL:  input.PhotoURL,
-		Role:      domain.Employees,
-		Status:    domain.Active,
-		CreatedAt: tNow,
-		UpdatedAt: tNow,
+		ID:              uuid.New().String(),
+		Email:           input.Email,
+		Password:        hashedPassword,
+		EmailVerifiedAt: &tNow,
+		Role:            domain.Employees,
+		CreatedAt:       tNow,
+		UpdatedAt:       tNow,
 	}
 
 	user, err = us.repo.CreateUserTx(ctx, tx, user)
@@ -91,18 +89,24 @@ func (us *UserService) Register(ctx context.Context, input *dto.RegisterRequest)
 		return nil, consts.ErrInternal
 	}
 
+	department, err := us.departmentRepo.GetDepartmentByName(ctx, input.Department)
+	if err != nil {
+		us.log.Error(err.Error())
+		return nil, consts.ErrInternal
+	}
+
 	employee := &domain.Employee{
-		ID:        uuid.New().String(),
-		UserID:    user.ID,
-		Name:      input.FullName,
-		Email:     input.Email,
-		PhotoURL:  input.PhotoURL,
-		Location:  input.Location,
-		Timezone:  "UTC",
-		Status:    domain.StatusActive,
-		JoinDate:  tNow,
-		CreatedAt: tNow,
-		UpdatedAt: tNow,
+		ID:           uuid.New().String(),
+		UserID:       user.ID,
+		Name:         input.FullName,
+		PhotoURL:     input.PhotoURL,
+		Location:     input.Location,
+		Timezone:     "UTC",
+		Status:       domain.StatusActive,
+		DepartmentID: department.ID,
+		JoinDate:     tNow,
+		CreatedAt:    tNow,
+		UpdatedAt:    tNow,
 	}
 
 	_, err = us.employeeRepo.CreateEmployeeTx(ctx, tx, employee)
@@ -152,7 +156,6 @@ func (us *UserService) GetUser(ctx context.Context, id string) (*domain.User, er
 	return user, nil
 }
 
-// ListUsers lists all users
 func (us *UserService) ListUsers(ctx context.Context, page, limit uint64) ([]domain.User, error) {
 	var users []domain.User
 
@@ -221,10 +224,6 @@ func (s *UserService) UpdateProfile(ctx context.Context, input dto.UpdateUserReq
 	var user domain.User
 	user.ID = userSession.UserID
 
-	if input.Name != "" {
-		user.FullName = input.Name
-	}
-
 	if input.Password != "" {
 		hashedPassword, err := util.HashPassword(input.Password)
 		if err != nil {
@@ -235,4 +234,105 @@ func (s *UserService) UpdateProfile(ctx context.Context, input dto.UpdateUserReq
 	}
 
 	return s.repo.UpdateUser(ctx, &user)
+}
+
+func (s *UserService) GetUserByID(ctx context.Context, id string) (*domain.User, error) {
+	return s.repo.FindByID(ctx, id)
+}
+
+func (s *UserService) CreateUser(ctx context.Context, req dto.CreateUserRequest) (*domain.User, error) {
+	exist, err := s.repo.ExistEmail(ctx, req.Email)
+	if err != nil {
+		if err == consts.ErrDataNotFound {
+			return nil, consts.ErrDataNotFound
+		}
+		s.log.Error("Error checking email existence", zap.Error(err))
+		return nil, consts.ErrInternal
+	}
+
+	if exist {
+		s.log.Warn("Email already exists", zap.String("email", req.Email))
+		return nil, consts.ErrEmailAlreadyExist
+	}
+
+	hashedPassword, err := util.HashPassword(req.Password)
+	if err != nil {
+		s.log.Error("Error hashing password", zap.Error(err))
+		return nil, consts.ErrInternal
+	}
+
+	user := &domain.User{
+		Email:    req.Email,
+		Password: hashedPassword,
+		Role:     req.Role,
+	}
+
+	user, err = s.repo.Create(ctx, user)
+	if err != nil {
+		s.log.Error("Error creating user", zap.Error(err))
+		return nil, consts.ErrInternal
+	}
+
+	return user, nil
+}
+
+func (s *UserService) UpdateUserByID(ctx context.Context, id string, req dto.UpdateUserRequest) (*domain.User, error) {
+	user, err := s.repo.FindByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	if req.Email != "" {
+		exist, err := s.repo.ExistEmail(ctx, req.Email)
+		if err != nil {
+			return nil, err
+		}
+		if exist {
+			return nil, consts.ErrEmailAlreadyExist
+		}
+
+		user.Email = req.Email
+	}
+
+	if req.Password != "" {
+		hashedPassword, err := util.HashPassword(req.Password)
+		if err != nil {
+			return nil, consts.ErrInternal
+		}
+		user.Password = hashedPassword
+	}
+
+	if req.Role != "" {
+		user.Role = req.Role
+	}
+
+	if req.Password != "" {
+		user.Password = req.Password
+	}
+	user.Role = req.Role
+
+	return s.repo.Update(ctx, user)
+}
+
+func (s *UserService) DeleteUserByID(ctx context.Context, id string) error {
+	// Delete user from database
+	err := s.repo.Delete(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	// Delete individual user cache
+	userCacheKey := util.GenerateCacheKey("user", id)
+	err = s.cache.Delete(ctx, userCacheKey)
+	if err != nil {
+		return consts.ErrInternal
+	}
+
+	// Delete all users list cache
+	err = s.cache.DeleteByPrefix(ctx, "users:*")
+	if err != nil {
+		return consts.ErrInternal
+	}
+
+	return nil
 }

@@ -33,12 +33,7 @@ type User struct {
 	ID              string     `json:"id"`
 	Email           string     `json:"email"`
 	Password        string     `json:"password"`
-	FullName        string     `json:"full_name"`
 	Role            UserRole   `json:"role"`
-	Location        string     `json:"location"`
-	Timezone        string     `json:"timezone"`
-	PhotoURL        string     `json:"photo_url"`
-	Status          UserStatus `json:"status"`
 	EmailVerifiedAt *time.Time `json:"email_verified_at"`
 	CreatedAt       time.Time  `json:"created_at"`
 	UpdatedAt       time.Time  `json:"updated_at"`

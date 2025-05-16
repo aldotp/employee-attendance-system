@@ -4,7 +4,7 @@ import "time"
 
 type Schedule struct {
 	ID             string    `json:"id"`
-	EmployeeID     string    `json:"employee_id"`
+	UserID         string    `json:"user_id"`
 	Date           time.Time `json:"date"`
 	ShiftStart     string    `json:"shift_start"`
 	ShiftEnd       string    `json:"shift_end"`

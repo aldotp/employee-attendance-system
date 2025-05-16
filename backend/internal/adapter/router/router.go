@@ -72,6 +72,15 @@ func NewRouter(
 			user.PUT("/profile", userHandler.UpdateProfile)
 		}
 
+		admin := v1.Group("/admin").Use(middleware.AuthMiddleware(token), middleware.VerifyRole(domain.Admin, domain.HR))
+		{
+			admin.GET("/users", userHandler.ListUser)
+			admin.GET("/users/:id", userHandler.GetUserByID)
+			admin.POST("/users", userHandler.CreateUser)
+			admin.DELETE("/users/:id", userHandler.DeleteUserByID)
+			admin.PUT("/users/:id", userHandler.UpdateUserByID)
+		}
+
 		notification := v1.Group("/notification").Use(middleware.AuthMiddleware(token))
 		{
 			notification.GET("", notificationHandler.ListNotifications)
@@ -125,8 +134,7 @@ func NewRouter(
 			monitoring.GET("/summary", monitoringHandler.GetSummary)
 			monitoring.GET("/dashboard", monitoringHandler.GetDashboardAnalytics)
 			monitoring.GET("/attendance-report", monitoringHandler.GenerateAttendanceReport)
-			monitoring.GET("/anomalies", monitoringHandler.DetectAnomalies)
-			monitoring.POST("/export", monitoringHandler.ExportData)
+			monitoring.GET("/export", monitoringHandler.ExportData)
 		}
 	}
 
